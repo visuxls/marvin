@@ -1,0 +1,4 @@
+Transaction ID,Account ID,Date,Amount,Category,Merchant,Description
+tx-1,1,2026-04-10,-1200.00,Rent,Landlord,April rent
+tx-2,1,2026-05-15,3500.00,Salary,Employer,Paycheck
+tx-3,1,2026-06-01,-85.50,Groceries,Whole Foods,Weekly groceries

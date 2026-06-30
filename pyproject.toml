@@ -1,0 +1,52 @@
+[project]
+name = "marvin"
+version = "0.1.0"
+description = "Personal CFO assistant: chat with your finances using CSV imports and live market data."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.138.2",
+    "pydantic-ai>=2.1.0",
+    "pydantic-ai-slim[ag-ui]>=2.1.0",
+    "pydantic-settings>=2.14.2",
+    "yfinance>=1.5.1",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=6.0",
+    "pytest-asyncio>=0.25",
+    "httpx>=0.28",
+    "ruff>=0.15.20",
+    "ty>=0.0.55",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+pythonpath = ["."]
+
+[tool.coverage.run]
+source = ["agent", "config", "ingestion", "models", "services", "storage", "web", "app"]
+branch = true
+
+[tool.coverage.report]
+fail_under = 100
+show_missing = true
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+extend-exclude = ["frontend"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["UP047"]
+
+[tool.ty.environment]
+python-version = "3.13"
+
+[tool.ty.src]
+exclude = ["frontend"]

@@ -1,0 +1,41 @@
+About Me
+------
+Age: 27
+Location: Chicago, IL
+
+Education and Employment
+------------------------
+Education level: Bachelor's degree
+School or program: DePaul University
+Employment status: Full-time
+Current role: Senior Sales Development Representative
+Employer: Mid-size B2B SaaS company (Series C)
+Current income: $75,000 base + ~$25,000 variable (OTE ~$100,000)
+Expected income after promotion to AE: $110,000–$130,000 OTE within 12 months
+
+Financial Situation
+-------------------
+Dependents: None
+Major monthly expenses: Rent (Lakeview one-bedroom), CTA pass, dining out, gym
+Debt notes: ~$8,000 remaining federal student loans at 4.8% (on track to pay off in 14 months)
+Emergency fund goal: 6 months of expenses (~$22,000) — fully funded
+Risk tolerance: Moderate — diversified index funds with some individual tech positions
+
+Near-Term Priorities
+--------------------
+- Pay off remaining student loans by end of next year
+- Max out Roth IRA ($7,000/year)
+- Build taxable brokerage toward $75,000 for flexibility before AE transition
+- Save $15,000 for a future home down payment fund
+
+Professional Goals After School
+-------------------------------
+Target role or industry: Account Executive at a tech company
+Target timeline: 6–12 months
+Salary expectations: $110,000–$140,000 OTE as an AE
+Geographic preferences: Stay in Chicago or relocate to Denver/Austin for AE role
+
+Additional Context
+------------------
+This is demo data for exploring Marvin. Replace data/imports/*.csv,
+data/profile.txt, and your real financial details when you are ready.
