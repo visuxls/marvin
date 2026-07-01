@@ -10,12 +10,12 @@ import {
   ReasoningContent,
   ReasoningTrigger,
 } from "@/components/ai-elements/reasoning";
+import { MarvinToolOutput } from "@/components/finance/marvin-tool-output";
 import {
   Tool,
   ToolContent,
   ToolHeader,
   ToolInput,
-  ToolOutput,
   type ToolPart,
 } from "@/components/ai-elements/tool";
 import { Button } from "@/components/ui/button";
@@ -84,10 +84,7 @@ function MarvinToolPart({
           JSON.stringify(toolPart.input) !== "{}" && (
             <ToolInput input={toolPart.input} />
           )}
-        <ToolOutput
-          errorText={"errorText" in toolPart ? toolPart.errorText : undefined}
-          output={"output" in toolPart ? toolPart.output : undefined}
-        />
+        <MarvinToolOutput toolPart={toolPart} />
         {needsApproval && onApprovalResponse && "toolCallId" in toolPart && (
           <div className="flex gap-2">
             <Button

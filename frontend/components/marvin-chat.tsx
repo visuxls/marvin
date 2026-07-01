@@ -20,6 +20,7 @@ import { useMarvinChat } from "@/hooks/use-marvin-chat";
 import { useMarvinConfig } from "@/hooks/use-marvin-config";
 import { useSidebarCollapsed } from "@/hooks/use-sidebar-collapsed";
 import { CHAT_COLUMN } from "@/lib/constants";
+import { pruneOrphanedAssistantPrefixes } from "@/lib/message-parts";
 import { cn } from "@/lib/utils";
 import { PRESET_QUESTIONS } from "@/lib/chat-suggestions";
 import { nanoid } from "nanoid";
@@ -104,10 +105,21 @@ export function MarvinChat({
 
   const handleRegenerate = useCallback(
     (messageId: string) => {
+      const pruned = pruneOrphanedAssistantPrefixes(messages, messageId);
+      const didPrune = pruned.length !== messages.length;
+
+      if (didPrune) {
+        setMessages(pruned);
+        queueMicrotask(() => {
+          regenerate({ messageId }).catch(() => {});
+        });
+        return;
+      }
+
       // User feedback for clipboard/regenerate failures is deferred.
       regenerate({ messageId }).catch(() => {});
     },
-    [regenerate]
+    [messages, regenerate, setMessages]
   );
 
   const handleRetry = useCallback(() => {

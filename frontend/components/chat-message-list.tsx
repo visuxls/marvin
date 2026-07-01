@@ -1,11 +1,17 @@
 "use client";
 
 import { Message, MessageContent } from "@/components/ai-elements/message";
+import { MessageChartSupplements } from "@/components/finance/message-chart-supplements";
 import {
   MessagePart,
   ThinkingGroup,
 } from "@/components/message-part";
-import { groupMessageParts } from "@/lib/message-parts";
+import {
+  groupMessageParts,
+  lastTextPartIndex,
+  mergeConsecutiveAssistantMessages,
+  orderMessageGroupsForDisplay,
+} from "@/lib/message-parts";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { CHAT_COLUMN } from "@/lib/constants";
@@ -65,9 +71,17 @@ export function ChatMessageList({
           title="How can I help with your finances?"
         />
       ) : (
-        messages
-          .filter((message) => message.role !== "system")
-          .map((message) => (
+        mergeConsecutiveAssistantMessages(
+          messages.filter((message) => message.role !== "system")
+        ).map((message, messageIndex, visibleMessages) => {
+          const isLastMessage = messageIndex === visibleMessages.length - 1;
+          const hideCharts =
+            message.role === "assistant" &&
+            isLastMessage &&
+            (status === "streaming" || status === "submitted");
+          const lastTextIndex = lastTextPartIndex(message.parts);
+
+          return (
           <Message
             className={cn(
               "w-full max-w-none",
@@ -83,7 +97,9 @@ export function ChatMessageList({
                   : "w-full max-w-none text-[15px] leading-7"
               )}
             >
-              {groupMessageParts(message.parts).map((group) => {
+              {orderMessageGroupsForDisplay(
+                groupMessageParts(message.parts)
+              ).map((group) => {
                 if (group.type === "thinking") {
                   return (
                     <ThinkingGroup
@@ -100,7 +116,7 @@ export function ChatMessageList({
                 return (
                   <MessagePart
                     chatStatus={status}
-                    isLastAssistantPart={index === message.parts.length - 1}
+                    isLastAssistantPart={index === lastTextIndex}
                     key={messagePartKey(message, part, index)}
                     message={message}
                     onRegenerate={onRegenerate}
@@ -108,9 +124,13 @@ export function ChatMessageList({
                   />
                 );
               })}
+              {message.role === "assistant" && !hideCharts ? (
+                <MessageChartSupplements message={message} />
+              ) : null}
             </MessageContent>
           </Message>
-        ))
+        );
+        })
       )}
 
       {status === "submitted" && (

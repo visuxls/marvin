@@ -35,6 +35,7 @@ components/
   chat-message-list.tsx   Message rendering, loading, errors
   chat-composer.tsx       Input, model picker, stop/send
   message-part.tsx        Per-part renderer (text, tool, reasoning)
+  finance/                Secondary tool charts and JSON-only tool output
   model-icon.tsx          Model provider icons in composer
   theme-provider.tsx      next-themes wrapper
   theme-toggle.tsx        Light/dark control
@@ -186,6 +187,21 @@ npm run test:watch    # vitest watch mode
 - Mock `fetch` in `lib/` tests; component tests mock hooks or context as needed.
 - Proxy behavior tested in `app/api/[...path]/route.test.ts`.
 - Run `npm run typecheck` and `npm test` before merging frontend changes.
+
+## Finance charts
+
+Secondary shadcn/Recharts previews reinforce Marvin's advice after assistant prose — they never replace it.
+
+- **Placement** — `MessageChartSupplements` in [`components/chat-message-list.tsx`](components/chat-message-list.tsx) renders at the bottom of completed assistant messages, after all text parts. Charts are hidden on the last message while `status` is `submitted` or `streaming`.
+- **Persisted turns** — `mergeConsecutiveAssistantMessages` in [`lib/message-parts.ts`](lib/message-parts.ts) merges consecutive assistant UI messages before render so tool steps and the final answer display as one turn (matching live streaming).
+- **Tool panels** — [`components/finance/marvin-tool-output.tsx`](components/finance/marvin-tool-output.tsx) shows raw JSON only (collapsed "Raw data"); no charts in the thinking group.
+- **Cap** — At most 2 charts per message (`lib/extract-chartable-tools.ts`), first eligible tools in call order.
+- **Registry** — `lib/finance-tool-charts.tsx` maps tool names to chart components with type guards and minimum data thresholds. No financial calculations in the frontend.
+- **Components** — Chart UI lives in `components/finance/`; shared chrome in `finance-chart-shell.tsx`.
+
+Supported tools (v1): `get_portfolio_allocation`, `get_net_worth_over_time`, `get_monthly_burn`, `get_spending_breakdown`.
+
+To add a chart: extend types in `finance-tool-types.ts`, add a guard + renderer in `finance-tool-charts.tsx`, create a chart component, and add tests with fixture tool output.
 
 ## Backend API (proxied)
 

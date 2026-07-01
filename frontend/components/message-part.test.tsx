@@ -42,6 +42,8 @@ describe("ThinkingGroup", () => {
 
     expect(screen.getByText("Checking holdings.")).toBeInTheDocument();
     expect(screen.getByText("Holdings")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /holdings/i }));
+    expect(screen.getByRole("button", { name: /raw data/i })).toBeInTheDocument();
     expect(screen.queryByText("You have three positions.")).not.toBeInTheDocument();
   });
 });
