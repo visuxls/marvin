@@ -17,6 +17,85 @@ from web.request import request_with_cached_body
 VERCEL_AI_SDK_VERSION: Literal[6] = 6
 
 
+def _user_message_text(message: dict[str, Any]) -> str:
+    """
+    Extract trimmed text from a Vercel AI user message.
+
+    Args:
+        message: UI message from the chat client.
+
+    Returns:
+        Combined user text, or an empty string when none exists.
+    """
+    if message.get("role") != "user":
+        return ""
+
+    parts: list[dict[str, Any]] = message.get("parts", [])
+    chunks = [
+        str(part.get("text", "")).strip()
+        for part in parts
+        if part.get("type") == "text" and str(part.get("text", "")).strip()
+    ]
+    return "\n".join(chunks)
+
+
+def _stored_user_texts(stored_ui: Sequence[object]) -> set[str]:
+    """
+    Collect user prompt text already present in persisted UI history.
+
+    Args:
+        stored_ui: UI messages produced by ``VercelAIAdapter.dump_messages``.
+
+    Returns:
+        Trimmed user prompt strings from stored history.
+    """
+    texts: set[str] = set()
+    for message in stored_ui:
+        role = getattr(message, "role", None)
+        if role != "user":
+            continue
+        for part in getattr(message, "parts", []):
+            if getattr(part, "type", None) != "text":
+                continue
+            text = str(getattr(part, "text", "")).strip()
+            if text:
+                texts.add(text)
+    return texts
+
+
+def _extract_new_client_messages(
+    client_messages: list[dict[str, Any]],
+    stored_ui: Sequence[object],
+) -> list[dict[str, Any]]:
+    """
+    Return client UI messages that are not already persisted.
+
+    Length-based slicing works when the client transcript matches the server
+    shape. After live streaming, consecutive assistant steps are often merged
+    into one UI message while persisted history keeps them split, so a new user
+    prompt can share the same message count as stored history.
+
+    Args:
+        client_messages: UI messages submitted by the chat client.
+        stored_ui: UI messages produced from persisted model history.
+
+    Returns:
+        Only the client messages that should be appended to stored history.
+    """
+    if len(client_messages) > len(stored_ui):
+        return client_messages[len(stored_ui) :]
+
+    if not client_messages:
+        return []
+
+    last = client_messages[-1]
+    last_text = _user_message_text(last)
+    if last_text and last_text not in _stored_user_texts(stored_ui):
+        return [last]
+
+    return client_messages[len(stored_ui) :]
+
+
 def reconcile_chat_payload(
     payload: dict[str, Any],
     stored_messages: Sequence[ModelMessage],
@@ -45,7 +124,7 @@ def reconcile_chat_payload(
 
     client_messages = payload.get("messages", [])
     stored_ui = VercelAIAdapter.dump_messages(stored_messages, sdk_version=sdk_version)
-    new_messages = client_messages[len(stored_ui) :]
+    new_messages = _extract_new_client_messages(client_messages, stored_ui)
     stripped_payload = {**payload, "messages": new_messages}
     return list(stored_messages), stripped_payload
 

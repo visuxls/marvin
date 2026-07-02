@@ -122,9 +122,14 @@ function MarvinToolPart({
 function isThinkingGroupStreaming(
   chatStatus: ChatStatus,
   message: UIMessage,
-  group: Extract<MessagePartGroup, { type: "thinking" }>
+  group: Extract<MessagePartGroup, { type: "thinking" }>,
+  isLastMessage: boolean
 ): boolean {
-  if (chatStatus !== "streaming" || message.role !== "assistant") {
+  if (
+    chatStatus !== "streaming" ||
+    message.role !== "assistant" ||
+    !isLastMessage
+  ) {
     return false;
   }
 
@@ -151,6 +156,7 @@ interface ThinkingGroupProps {
   group: Extract<MessagePartGroup, { type: "thinking" }>;
   message: UIMessage;
   chatStatus: ChatStatus;
+  isLastMessage: boolean;
   onApprovalResponse?: ChatAddToolApproveResponseFunction;
 }
 
@@ -158,6 +164,7 @@ export function ThinkingGroup({
   group,
   message,
   chatStatus,
+  isLastMessage,
   onApprovalResponse,
 }: ThinkingGroupProps) {
   const reasoningText = group.parts
@@ -167,7 +174,14 @@ export function ThinkingGroup({
   const toolParts = group.parts.filter(isToolPart);
 
   return (
-    <Reasoning isStreaming={isThinkingGroupStreaming(chatStatus, message, group)}>
+    <Reasoning
+      isStreaming={isThinkingGroupStreaming(
+        chatStatus,
+        message,
+        group,
+        isLastMessage
+      )}
+    >
       <ReasoningTrigger />
       <ReasoningContent>
         <div className="space-y-3">
@@ -193,6 +207,7 @@ interface MessagePartProps {
   message: UIMessage;
   chatStatus: ChatStatus;
   isLastAssistantPart: boolean;
+  isLastMessage: boolean;
   onRegenerate: (messageId: string) => void;
 }
 
@@ -201,12 +216,14 @@ export function MessagePart({
   message,
   chatStatus,
   isLastAssistantPart,
+  isLastMessage,
   onRegenerate,
 }: MessagePartProps) {
   if (part.type === "text") {
     const isStreamingText =
       chatStatus === "streaming" &&
       message.role === "assistant" &&
+      isLastMessage &&
       isLastAssistantPart;
 
     if (message.role === "user") {

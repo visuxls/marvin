@@ -105,6 +105,7 @@ export function ChatMessageList({
                     <ThinkingGroup
                       chatStatus={status}
                       group={group}
+                      isLastMessage={isLastMessage}
                       key={`${message.id}-thinking-${group.startIndex}`}
                       message={message}
                       onApprovalResponse={onApprovalResponse}
@@ -117,6 +118,7 @@ export function ChatMessageList({
                   <MessagePart
                     chatStatus={status}
                     isLastAssistantPart={index === lastTextIndex}
+                    isLastMessage={isLastMessage}
                     key={messagePartKey(message, part, index)}
                     message={message}
                     onRegenerate={onRegenerate}

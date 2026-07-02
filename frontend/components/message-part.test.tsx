@@ -1,10 +1,16 @@
-import { ThinkingGroup } from "@/components/message-part";
+import { MessagePart, ThinkingGroup } from "@/components/message-part";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { UIMessage } from "ai";
 
 vi.mock("streamdown", () => ({
-  Streamdown: ({ children }: { children: string }) => <div>{children}</div>,
+  Streamdown: ({
+    children,
+    mode,
+  }: {
+    children: string;
+    mode?: string;
+  }) => <div data-mode={mode ?? "static"}>{children}</div>,
 }));
 
 describe("ThinkingGroup", () => {
@@ -34,6 +40,7 @@ describe("ThinkingGroup", () => {
           startIndex: 0,
           parts: message.parts.slice(0, 2),
         }}
+        isLastMessage={false}
         message={message}
       />
     );
@@ -45,5 +52,55 @@ describe("ThinkingGroup", () => {
     await user.click(screen.getByRole("button", { name: /holdings/i }));
     expect(screen.getByRole("button", { name: /raw data/i })).toBeInTheDocument();
     expect(screen.queryByText("You have three positions.")).not.toBeInTheDocument();
+  });
+});
+
+describe("MessagePart", () => {
+  it("uses static mode for older assistant messages while streaming", () => {
+    const priorAssistant: UIMessage = {
+      id: "a1",
+      role: "assistant",
+      parts: [{ type: "text", text: "Earlier reply" }],
+    };
+
+    render(
+      <MessagePart
+        chatStatus="streaming"
+        isLastAssistantPart={true}
+        isLastMessage={false}
+        message={priorAssistant}
+        onRegenerate={vi.fn()}
+        part={priorAssistant.parts[0]}
+      />
+    );
+
+    expect(screen.getByText("Earlier reply")).toHaveAttribute(
+      "data-mode",
+      "static"
+    );
+  });
+
+  it("uses streaming mode only for the active assistant message", () => {
+    const activeAssistant: UIMessage = {
+      id: "a2",
+      role: "assistant",
+      parts: [{ type: "text", text: "New reply" }],
+    };
+
+    render(
+      <MessagePart
+        chatStatus="streaming"
+        isLastAssistantPart={true}
+        isLastMessage={true}
+        message={activeAssistant}
+        onRegenerate={vi.fn()}
+        part={activeAssistant.parts[0]}
+      />
+    );
+
+    expect(screen.getByText("New reply")).toHaveAttribute(
+      "data-mode",
+      "streaming"
+    );
   });
 });
