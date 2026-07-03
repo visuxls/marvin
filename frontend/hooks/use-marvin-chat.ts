@@ -20,20 +20,31 @@ export function useMarvinChat({
   model,
   onChatComplete,
 }: UseMarvinChatOptions) {
+  const modelRef = useRef(model);
+  useEffect(() => {
+    modelRef.current = model;
+  }, [model]);
+
+  // useChat only recreates its Chat instance when `id` changes, not when transport
+  // changes. Read the selected model from a ref so each request uses the current
+  // picker value instead of the model that was active on first mount.
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
         api: chatApiUrl(),
         body: () => ({
-          model: model || undefined,
+          model: modelRef.current || undefined,
         }),
       }),
-    [model]
+    []
   );
 
   const chat = useChat({
     transport,
     id: conversationId,
+    // Batch stream updates so Streamdown/markdown re-renders do not exceed React's
+    // nested update limit on long tool-heavy replies (see AI SDK troubleshooting).
+    experimental_throttle: 50,
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses,
   });
 
