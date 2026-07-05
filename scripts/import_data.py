@@ -32,9 +32,9 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO)
     settings = get_settings()
     if args.imports_dir is not None:
-        settings = settings.model_copy(update={"imports_dir": args.imports_dir})
+        settings = settings.model_copy(update={"IMPORTS_DIR": args.imports_dir})
     if args.db_path is not None:
-        settings = settings.model_copy(update={"db_path": args.db_path})
+        settings = settings.model_copy(update={"DB_PATH": args.db_path})
     ensure_demo_data(settings)
     results = import_all(settings=settings)
     log_import_results(results)

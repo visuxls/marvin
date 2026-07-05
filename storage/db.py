@@ -96,7 +96,7 @@ def connect(db_path: Path | None = None) -> sqlite3.Connection:
     Returns:
         A SQLite connection with foreign keys enabled and row access by name.
     """
-    resolved = db_path or get_settings().db_path
+    resolved = db_path or get_settings().DB_PATH
     resolved.parent.mkdir(parents=True, exist_ok=True)
     connection = sqlite3.connect(resolved)
     connection.row_factory = sqlite3.Row

@@ -32,7 +32,7 @@ def test_index_route_with_conversation_id(web_app):
 
 
 def test_lifespan_runs_import_when_enabled(test_settings: Settings, monkeypatch):
-    test_settings.auto_import_on_startup = True
+    test_settings.AUTO_IMPORT_ON_STARTUP = True
     monkeypatch.setattr("web.app.get_settings", lambda: test_settings)
     monkeypatch.setattr("web.lifespan.get_settings", lambda: test_settings)
     agent = Agent(TestModel(), deps_type=CFODeps)
@@ -49,7 +49,7 @@ def test_lifespan_runs_import_when_enabled(test_settings: Settings, monkeypatch)
 
 
 def test_lifespan_skips_import_when_disabled(test_settings: Settings, monkeypatch):
-    test_settings.auto_import_on_startup = False
+    test_settings.AUTO_IMPORT_ON_STARTUP = False
     monkeypatch.setattr("web.app.get_settings", lambda: test_settings)
     monkeypatch.setattr("web.lifespan.get_settings", lambda: test_settings)
     agent = Agent(TestModel(), deps_type=CFODeps)

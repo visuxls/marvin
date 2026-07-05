@@ -1,4 +1,5 @@
 import { ChatComposer } from "@/components/chat-composer";
+import type { MarvinConfigure } from "@/lib/marvin-api";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -16,7 +17,12 @@ const config = {
     { id: "model-b", name: "Model B", builtinTools: [] },
   ],
   builtinTools: [],
-};
+  reasoningEfforts: [
+    { id: "off", label: "Off" },
+    { id: "high", label: "High" },
+  ],
+  defaultReasoningEffort: "off",
+} satisfies MarvinConfigure;
 
 describe("ChatComposer", () => {
   it("submits trimmed input via the form", async () => {
@@ -32,8 +38,10 @@ describe("ChatComposer", () => {
         model="model-a"
         onInputChange={onInputChange}
         onModelChange={vi.fn()}
+        onReasoningEffortChange={vi.fn()}
         onStop={vi.fn()}
         onSubmit={onSubmit}
+        reasoningEffort="off"
       />
     );
 
@@ -51,8 +59,10 @@ describe("ChatComposer", () => {
         model="model-a"
         onInputChange={vi.fn()}
         onModelChange={vi.fn()}
+        onReasoningEffortChange={vi.fn()}
         onStop={vi.fn()}
         onSubmit={vi.fn()}
+        reasoningEffort="off"
       />
     );
 
@@ -71,8 +81,10 @@ describe("ChatComposer", () => {
         model="model-a"
         onInputChange={vi.fn()}
         onModelChange={vi.fn()}
+        onReasoningEffortChange={vi.fn()}
         onStop={onStop}
         onSubmit={vi.fn()}
+        reasoningEffort="off"
       />
     );
 
@@ -92,8 +104,10 @@ describe("ChatComposer", () => {
         model="model-a"
         onInputChange={vi.fn()}
         onModelChange={vi.fn()}
+        onReasoningEffortChange={vi.fn()}
         onStop={vi.fn()}
         onSubmit={onSubmit}
+        reasoningEffort="off"
       />
     );
 

@@ -30,8 +30,8 @@ def build_deps(settings: Settings | None = None) -> CFODeps:
     """
     resolved = settings or get_settings()
     return CFODeps(
-        db_path=resolved.db_path,
-        profile_path=resolved.profile_path,
+        db_path=resolved.DB_PATH,
+        profile_path=resolved.PROFILE_PATH,
     )
 
 

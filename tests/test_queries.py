@@ -11,7 +11,7 @@ from storage.session import db_connection
 @pytest.fixture
 def seeded_db(test_settings: Settings):
     import_all(settings=test_settings)
-    return test_settings.db_path
+    return test_settings.DB_PATH
 
 
 def test_list_accounts(seeded_db):

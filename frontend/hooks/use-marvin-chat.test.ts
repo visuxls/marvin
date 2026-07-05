@@ -1,11 +1,15 @@
 import { useMarvinChat } from "@/hooks/use-marvin-chat";
+import type { ReasoningEffortId } from "@/lib/marvin-api";
 import { renderHook } from "@testing-library/react";
 
-const capturedTransports: Array<{ body: () => Promise<{ model?: string }> }> =
-  [];
+const capturedTransports: Array<{
+  body: () => Promise<{ model?: string; reasoningEffort?: string }>;
+}> = [];
 
 vi.mock("@ai-sdk/react", () => ({
-  useChat: (options: { transport: { body: () => Promise<{ model?: string }> } }) => {
+  useChat: (options: {
+    transport: { body: () => Promise<{ model?: string; reasoningEffort?: string }> };
+  }) => {
     if (capturedTransports.length === 0) {
       capturedTransports.push(options.transport);
     }
@@ -28,9 +32,11 @@ vi.mock("ai", async (importOriginal) => {
   return {
     ...actual,
     DefaultChatTransport: class {
-      body: () => Promise<{ model?: string }>;
+      body: () => Promise<{ model?: string; reasoningEffort?: string }>;
 
-      constructor(options: { body: () => { model?: string } }) {
+      constructor(options: {
+        body: () => { model?: string; reasoningEffort?: string };
+      }) {
         this.body = async () => options.body();
       }
     },
@@ -45,20 +51,30 @@ describe("useMarvinChat", () => {
 
   it("sends the latest selected model even after the picker changes", async () => {
     const { rerender } = renderHook(
-      ({ model }) =>
+      ({ model, reasoningEffort }) =>
         useMarvinChat({
           conversationId: "chat-1",
           model,
+          reasoningEffort,
         }),
-      { initialProps: { model: "openrouter:z-ai/glm-5.2" } }
+      {
+        initialProps: {
+          model: "openrouter:z-ai/glm-5.2",
+          reasoningEffort: "off" as ReasoningEffortId,
+        },
+      }
     );
 
     expect(capturedTransports).toHaveLength(1);
 
-    rerender({ model: "openrouter:anthropic/claude-opus-4.8" });
+    rerender({
+      model: "openrouter:anthropic/claude-opus-4.8",
+      reasoningEffort: "xhigh",
+    });
 
     await expect(capturedTransports[0]!.body()).resolves.toEqual({
       model: "openrouter:anthropic/claude-opus-4.8",
+      reasoningEffort: "xhigh",
     });
   });
 });

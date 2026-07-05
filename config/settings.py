@@ -11,19 +11,21 @@ class Settings(BaseSettings):
     Application configuration loaded from environment variables and `.env`.
     """
 
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        extra="ignore",
+    OPENROUTER_API_KEY: SecretStr
+    OPENROUTER_MODEL: str = "z-ai/glm-5.2"
+    OPENROUTER_MODELS: Annotated[list[str], NoDecode] = Field(default_factory=list)
+    OPENROUTER_PROVIDER_ORDER: str = "deepinfra"
+    OPENROUTER_ALLOW_FALLBACKS: bool = True
+
+    DB_PATH: Path = Path("data/marvin.db")
+    IMPORTS_DIR: Path = Path("data/imports")
+    PROFILE_PATH: Path = Path("data/profile.txt")
+    AUTO_IMPORT_ON_STARTUP: bool = True
+    CORS_ORIGINS: list[str] = Field(
+        default_factory=lambda: ["http://127.0.0.1:3000", "http://localhost:3000"]
     )
 
-    openrouter_api_key: SecretStr
-    openrouter_model: str = "z-ai/glm-5.2"
-    openrouter_models: Annotated[list[str], NoDecode] = Field(default_factory=list)
-    openrouter_provider_order: str = "deepinfra"
-    openrouter_allow_fallbacks: bool = True
-
-    @field_validator("openrouter_models", mode="before")
+    @field_validator("OPENROUTER_MODELS", mode="before")
     @classmethod
     def parse_openrouter_models(cls, value: object) -> list[str]:
         """
@@ -43,12 +45,10 @@ class Settings(BaseSettings):
             return cast(list[str], value)
         return []
 
-    db_path: Path = Path("data/marvin.db")
-    imports_dir: Path = Path("data/imports")
-    profile_path: Path = Path("data/profile.txt")
-    auto_import_on_startup: bool = True
-    cors_origins: list[str] = Field(
-        default_factory=lambda: ["http://127.0.0.1:3000", "http://localhost:3000"]
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
     )
 
 

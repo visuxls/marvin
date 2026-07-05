@@ -31,7 +31,7 @@ def load_profile(profile_path: Path | None = None) -> str:
     """
     global _cached_mtime, _cached_content
 
-    path = profile_path or get_settings().profile_path
+    path = profile_path or get_settings().PROFILE_PATH
     if not path.exists():
         _cached_mtime = None
         _cached_content = None

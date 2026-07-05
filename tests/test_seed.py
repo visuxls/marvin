@@ -16,12 +16,12 @@ def empty_settings(tmp_path: Path) -> Settings:
     Build settings pointing at empty temporary paths.
     """
     return Settings(
-        openrouter_api_key=SecretStr("test-key"),
-        openrouter_models=[],
-        db_path=tmp_path / "marvin.db",
-        imports_dir=tmp_path / "imports",
-        profile_path=tmp_path / "profile.txt",
-        auto_import_on_startup=False,
+        OPENROUTER_API_KEY=SecretStr("test-key"),
+        OPENROUTER_MODELS=[],
+        DB_PATH=tmp_path / "marvin.db",
+        IMPORTS_DIR=tmp_path / "imports",
+        PROFILE_PATH=tmp_path / "profile.txt",
+        AUTO_IMPORT_ON_STARTUP=False,
     )
 
 
@@ -29,49 +29,49 @@ def test_ensure_demo_data_creates_missing_files(empty_settings: Settings):
     seeded = ensure_demo_data(settings=empty_settings)
 
     assert len(seeded) == 5
-    assert (empty_settings.imports_dir / "accounts.csv").exists()
-    assert (empty_settings.imports_dir / "balances.csv").exists()
-    assert (empty_settings.imports_dir / "holdings.csv").exists()
-    assert (empty_settings.imports_dir / "transactions.csv").exists()
-    assert empty_settings.profile_path.exists()
+    assert (empty_settings.IMPORTS_DIR / "accounts.csv").exists()
+    assert (empty_settings.IMPORTS_DIR / "balances.csv").exists()
+    assert (empty_settings.IMPORTS_DIR / "holdings.csv").exists()
+    assert (empty_settings.IMPORTS_DIR / "transactions.csv").exists()
+    assert empty_settings.PROFILE_PATH.exists()
 
-    accounts_text = (empty_settings.imports_dir / "accounts.csv").read_text(encoding="utf-8")
+    accounts_text = (empty_settings.IMPORTS_DIR / "accounts.csv").read_text(encoding="utf-8")
     assert accounts_text == (SEED_TEMPLATES_DIR / "accounts.csv").read_text(encoding="utf-8")
 
 
 def test_ensure_demo_data_skips_existing_files(empty_settings: Settings):
-    empty_settings.imports_dir.mkdir(parents=True)
-    existing_accounts = empty_settings.imports_dir / "accounts.csv"
+    empty_settings.IMPORTS_DIR.mkdir(parents=True)
+    existing_accounts = empty_settings.IMPORTS_DIR / "accounts.csv"
     existing_accounts.write_text("custom content\n", encoding="utf-8")
-    empty_settings.profile_path.write_text("custom profile\n", encoding="utf-8")
+    empty_settings.PROFILE_PATH.write_text("custom profile\n", encoding="utf-8")
 
     seeded = ensure_demo_data(settings=empty_settings)
 
     assert existing_accounts not in seeded
-    assert empty_settings.profile_path not in seeded
+    assert empty_settings.PROFILE_PATH not in seeded
     assert existing_accounts.read_text(encoding="utf-8") == "custom content\n"
-    assert empty_settings.profile_path.read_text(encoding="utf-8") == "custom profile\n"
+    assert empty_settings.PROFILE_PATH.read_text(encoding="utf-8") == "custom profile\n"
     assert len(seeded) == 3
-    assert (empty_settings.imports_dir / "balances.csv") in seeded
-    assert (empty_settings.imports_dir / "holdings.csv") in seeded
-    assert (empty_settings.imports_dir / "transactions.csv") in seeded
+    assert (empty_settings.IMPORTS_DIR / "balances.csv") in seeded
+    assert (empty_settings.IMPORTS_DIR / "holdings.csv") in seeded
+    assert (empty_settings.IMPORTS_DIR / "transactions.csv") in seeded
 
 
 def test_ensure_demo_data_seeds_only_missing(empty_settings: Settings):
-    empty_settings.imports_dir.mkdir(parents=True)
-    (empty_settings.imports_dir / "accounts.csv").write_text(
+    empty_settings.IMPORTS_DIR.mkdir(parents=True)
+    (empty_settings.IMPORTS_DIR / "accounts.csv").write_text(
         "Account ID,Name,Type,Institution\n1,Only,Checking,Bank\n",
         encoding="utf-8",
     )
 
     seeded = ensure_demo_data(settings=empty_settings)
 
-    assert empty_settings.imports_dir / "accounts.csv" not in seeded
+    assert empty_settings.IMPORTS_DIR / "accounts.csv" not in seeded
     assert len(seeded) == 4
-    assert (empty_settings.imports_dir / "balances.csv") in seeded
-    assert (empty_settings.imports_dir / "holdings.csv") in seeded
-    assert (empty_settings.imports_dir / "transactions.csv") in seeded
-    assert empty_settings.profile_path in seeded
+    assert (empty_settings.IMPORTS_DIR / "balances.csv") in seeded
+    assert (empty_settings.IMPORTS_DIR / "holdings.csv") in seeded
+    assert (empty_settings.IMPORTS_DIR / "transactions.csv") in seeded
+    assert empty_settings.PROFILE_PATH in seeded
 
 
 def test_demo_data_imports_cleanly(empty_settings: Settings):
@@ -86,6 +86,6 @@ def test_demo_data_imports_cleanly(empty_settings: Settings):
     assert results[2].skipped == 0
     assert results[3].skipped == 0
 
-    with db_connection(empty_settings.db_path) as connection:
+    with db_connection(empty_settings.DB_PATH) as connection:
         assert len(list_accounts(connection)) == 3
         assert len(get_holdings(connection)) == 3

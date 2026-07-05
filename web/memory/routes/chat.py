@@ -7,6 +7,7 @@ from pydantic_ai.run import AgentRunResult
 from pydantic_ai.ui._web.api import ChatRequestExtra, validate_request_options  # private API
 from pydantic_ai.ui.vercel_ai import VercelAIAdapter
 
+from agent.model import build_model_settings
 from storage.conversation_memory import (
     DEFAULT_CONVERSATION_ID,
     load_conversation_messages,
@@ -20,7 +21,7 @@ from web.chat_history import (
 from web.conversations import title_from_ui_messages
 from web.dependencies import ChatRuntimeDep, SettingsDep
 from web.request import read_json_body
-from web.schemas import ErrorDetail
+from web.schemas import ChatRequestOptions, ErrorDetail, resolve_reasoning_effort
 
 router = APIRouter()
 
@@ -52,7 +53,7 @@ async def post_chat(
     stored_messages = await asyncio.to_thread(
         load_conversation_messages,
         conversation_id,
-        db_path=settings.db_path,
+        db_path=settings.DB_PATH,
     )
     message_history, payload = reconcile_chat_payload(
         payload,
@@ -66,7 +67,7 @@ async def post_chat(
             save_conversation_messages,
             conversation_id,
             result.all_messages(),
-            db_path=settings.db_path,
+            db_path=settings.DB_PATH,
             fallback_title=title_from_ui_messages(client_messages),
         )
 
@@ -90,11 +91,20 @@ async def post_chat(
             detail=ErrorDetail(error=error).model_dump(),
         )
 
+    try:
+        chat_options = ChatRequestOptions.model_validate(payload)
+    except ValidationError as exc:
+        raise HTTPException(status_code=422, detail=exc.errors()) from exc
+
     model_ref = runtime.model_id_to_ref.get(extra_data.model) if extra_data.model else None
     request_native_tools = [
         tool for tool in runtime.ui_native_tools if tool.unique_id in extra_data.builtin_tools
     ]
     request_capabilities = [NativeTool(tool) for tool in request_native_tools]
+    request_model_settings = build_model_settings(
+        settings,
+        reasoning_effort=resolve_reasoning_effort(chat_options),
+    )
 
     return await adapter.dispatch_request(
         request,
@@ -103,7 +113,7 @@ async def post_chat(
         model=model_ref,
         capabilities=request_capabilities,
         deps=runtime.deps,
-        model_settings=runtime.model_settings,
+        model_settings=request_model_settings,
         instructions=runtime.instructions,
         message_history=message_history,
         conversation_id=conversation_id,

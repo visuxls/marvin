@@ -202,8 +202,8 @@ def import_all(
         Import results for accounts.csv, balances.csv, holdings.csv, and transactions.csv.
     """
     resolved = settings or get_settings()
-    resolved_imports_dir = imports_dir or resolved.imports_dir
-    resolved_db_path = db_path or resolved.db_path
+    resolved_imports_dir = imports_dir or resolved.IMPORTS_DIR
+    resolved_db_path = db_path or resolved.DB_PATH
 
     with db_connection(resolved_db_path) as connection:
         results = [

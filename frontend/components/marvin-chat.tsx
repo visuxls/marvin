@@ -36,7 +36,8 @@ export function MarvinChat({
   onConversationIdChange,
 }: MarvinChatProps) {
   const [input, setInput] = useState("");
-  const { config, model, setModel } = useMarvinConfig();
+  const { config, model, setModel, reasoningEffort, setReasoningEffort } =
+    useMarvinConfig();
   const { refresh, setSearchQuery } = useConversations();
   const { collapsed: sidebarCollapsed, setCollapsed: setSidebarCollapsed } =
     useSidebarCollapsed();
@@ -55,6 +56,7 @@ export function MarvinChat({
   } = useMarvinChat({
     conversationId,
     model,
+    reasoningEffort,
     onChatComplete: refresh,
   });
 
@@ -205,8 +207,10 @@ export function MarvinChat({
               model={model}
               onInputChange={setInput}
               onModelChange={setModel}
+              onReasoningEffortChange={setReasoningEffort}
               onStop={stop}
               onSubmit={handleSubmit}
+              reasoningEffort={reasoningEffort}
             />
 
             <p className="mt-3 text-center text-muted-foreground text-xs">

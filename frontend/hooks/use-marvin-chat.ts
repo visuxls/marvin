@@ -1,6 +1,6 @@
 "use client";
 
-import { chatApiUrl } from "@/lib/marvin-api";
+import { chatApiUrl, type ReasoningEffortId } from "@/lib/marvin-api";
 import { useChat } from "@ai-sdk/react";
 import {
   DefaultChatTransport,
@@ -11,6 +11,7 @@ import { useEffect, useMemo, useRef } from "react";
 interface UseMarvinChatOptions {
   conversationId: string;
   model: string;
+  reasoningEffort: ReasoningEffortId;
   onChatComplete?: () => void;
 }
 
@@ -18,12 +19,17 @@ interface UseMarvinChatOptions {
 export function useMarvinChat({
   conversationId,
   model,
+  reasoningEffort,
   onChatComplete,
 }: UseMarvinChatOptions) {
   const modelRef = useRef(model);
+  const reasoningEffortRef = useRef(reasoningEffort);
   useEffect(() => {
     modelRef.current = model;
   }, [model]);
+  useEffect(() => {
+    reasoningEffortRef.current = reasoningEffort;
+  }, [reasoningEffort]);
 
   // useChat only recreates its Chat instance when `id` changes, not when transport
   // changes. Read the selected model from a ref so each request uses the current
@@ -34,6 +40,7 @@ export function useMarvinChat({
         api: chatApiUrl(),
         body: () => ({
           model: modelRef.current || undefined,
+          reasoningEffort: reasoningEffortRef.current,
         }),
       }),
     []

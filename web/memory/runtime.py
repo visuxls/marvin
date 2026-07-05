@@ -4,7 +4,6 @@ from typing import cast
 from pydantic_ai import Agent
 from pydantic_ai.models import KnownModelName, Model, infer_model
 from pydantic_ai.native_tools import SUPPORTED_NATIVE_TOOLS, AbstractNativeTool
-from pydantic_ai.settings import ModelSettings
 from pydantic_ai.ui._web.api import ModelInfo, ModelsParam  # private API
 
 ModelRef = Model | KnownModelName | str
@@ -18,7 +17,6 @@ class ChatRuntime[AgentDepsT, OutputDataT]:
 
     agent: Agent[AgentDepsT, OutputDataT]
     deps: AgentDepsT | None
-    model_settings: ModelSettings | None
     instructions: str | None
     model_id_to_ref: dict[str, ModelRef]
     model_infos: list[ModelInfo]
@@ -32,7 +30,6 @@ def build_chat_runtime[AgentDepsT, OutputDataT](
     *,
     models: ModelsParam = None,
     deps: AgentDepsT | None = None,
-    model_settings: ModelSettings | None = None,
     instructions: str | None = None,
 ) -> ChatRuntime[AgentDepsT, OutputDataT]:
     """
@@ -42,7 +39,6 @@ def build_chat_runtime[AgentDepsT, OutputDataT](
         agent: Marvin agent instance.
         models: Optional additional models for the UI.
         deps: Dependencies injected into each agent run.
-        model_settings: Optional per-request model settings.
         instructions: Optional per-request instructions.
 
     Returns:
@@ -85,7 +81,6 @@ def build_chat_runtime[AgentDepsT, OutputDataT](
     return ChatRuntime(
         agent=agent,
         deps=deps,
-        model_settings=model_settings,
         instructions=instructions,
         model_id_to_ref=model_id_to_ref,
         model_infos=model_infos,

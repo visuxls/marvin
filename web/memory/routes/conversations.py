@@ -33,7 +33,7 @@ async def list_conversations(settings: SettingsDep) -> list[ConversationSummaryR
     """
     summaries = await asyncio.to_thread(
         list_conversation_summaries,
-        db_path=settings.db_path,
+        db_path=settings.DB_PATH,
     )
     return [conversation_summary_response(summary) for summary in summaries]
 
@@ -59,7 +59,7 @@ async def get_conversation_messages(
     messages = await asyncio.to_thread(
         load_conversation_ui_messages,
         conversation_id,
-        db_path=settings.db_path,
+        db_path=settings.DB_PATH,
     )
     return ConversationMessagesResponse(messages=messages)
 
@@ -97,7 +97,7 @@ async def patch_conversation(
     updated = await asyncio.to_thread(
         update_conversation_metadata,
         conversation_id,
-        db_path=settings.db_path,
+        db_path=settings.DB_PATH,
         title=body.title,
         pinned=body.pinned,
     )
@@ -134,7 +134,7 @@ async def remove_conversation(
     deleted = await asyncio.to_thread(
         delete_conversation,
         conversation_id,
-        db_path=settings.db_path,
+        db_path=settings.DB_PATH,
     )
     if not deleted:
         raise HTTPException(

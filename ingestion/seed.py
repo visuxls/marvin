@@ -25,23 +25,23 @@ def ensure_demo_data(settings: Settings | None = None) -> list[Path]:
         Paths of files created during this call.
     """
     resolved = settings or get_settings()
-    resolved.imports_dir.mkdir(parents=True, exist_ok=True)
-    resolved.profile_path.parent.mkdir(parents=True, exist_ok=True)
-    resolved.db_path.parent.mkdir(parents=True, exist_ok=True)
+    resolved.IMPORTS_DIR.mkdir(parents=True, exist_ok=True)
+    resolved.PROFILE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    resolved.DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     seeded: list[Path] = []
 
     for filename in _CSV_FILES:
-        destination = resolved.imports_dir / filename
+        destination = resolved.IMPORTS_DIR / filename
         if destination.exists():
             continue
         shutil.copy2(SEED_TEMPLATES_DIR / filename, destination)
         seeded.append(destination)
         logger.info("Seeded demo data: %s", destination)
 
-    if not resolved.profile_path.exists():
-        shutil.copy2(SEED_TEMPLATES_DIR / "profile.txt", resolved.profile_path)
-        seeded.append(resolved.profile_path)
-        logger.info("Seeded demo data: %s", resolved.profile_path)
+    if not resolved.PROFILE_PATH.exists():
+        shutil.copy2(SEED_TEMPLATES_DIR / "profile.txt", resolved.PROFILE_PATH)
+        seeded.append(resolved.PROFILE_PATH)
+        logger.info("Seeded demo data: %s", resolved.PROFILE_PATH)
 
     return seeded

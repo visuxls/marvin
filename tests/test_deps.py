@@ -6,7 +6,7 @@ from storage import queries
 def test_build_deps(test_settings: Settings):
     deps = build_deps(test_settings)
     assert isinstance(deps, CFODeps)
-    assert deps.db_path == test_settings.db_path
+    assert deps.db_path == test_settings.DB_PATH
 
 
 def test_with_db(test_settings: Settings):

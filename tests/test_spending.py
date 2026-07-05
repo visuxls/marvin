@@ -106,7 +106,7 @@ def test_build_spending_breakdown(test_settings, db_path):
     from ingestion.importer import import_all
     from storage.session import db_connection
 
-    settings = test_settings.model_copy(update={"db_path": db_path})
+    settings = test_settings.model_copy(update={"DB_PATH": db_path})
     import_all(settings=settings)
     with db_connection(db_path) as connection:
         summary = build_spending_breakdown(connection)

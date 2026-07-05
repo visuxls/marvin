@@ -9,9 +9,9 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
-import type { MarvinConfigure } from "@/lib/marvin-api";
+import type { MarvinConfigure, ReasoningEffortId } from "@/lib/marvin-api";
 import { cn } from "@/lib/utils";
-import { ArrowUpIcon, SquareIcon } from "lucide-react";
+import { ArrowUpIcon, BrainIcon, SquareIcon } from "lucide-react";
 import type { FormEvent, KeyboardEvent } from "react";
 
 interface ChatComposerProps {
@@ -23,6 +23,8 @@ interface ChatComposerProps {
   config: MarvinConfigure | null;
   model: string;
   onModelChange: (modelId: string) => void;
+  reasoningEffort: ReasoningEffortId;
+  onReasoningEffortChange: (effort: ReasoningEffortId) => void;
 }
 
 export function ChatComposer({
@@ -34,6 +36,8 @@ export function ChatComposer({
   config,
   model,
   onModelChange,
+  reasoningEffort,
+  onReasoningEffortChange,
 }: ChatComposerProps) {
   const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === "Enter" && !event.shiftKey) {
@@ -42,8 +46,12 @@ export function ChatComposer({
     }
   };
 
+  const reasoningEfforts = config?.reasoningEfforts ?? [];
   const modelLabel =
     config?.models.find((entry) => entry.id === model)?.name ?? "Model";
+  const reasoningLabel =
+    reasoningEfforts.find((entry) => entry.id === reasoningEffort)?.label ??
+    "Reasoning";
   const canSend = isBusy || Boolean(input.trim());
 
   return (
@@ -63,6 +71,45 @@ export function ChatComposer({
           <ThemeToggle />
 
           <div className="flex items-center gap-2">
+            {reasoningEfforts.length > 0 && (
+              <Select
+                disabled={isBusy}
+                onValueChange={(value) => {
+                  if (value) {
+                    onReasoningEffortChange(value as ReasoningEffortId);
+                  }
+                }}
+                value={reasoningEffort}
+              >
+                <SelectTrigger
+                  className="h-8 shrink-0 rounded-full border-0 bg-muted px-3 text-muted-foreground text-xs shadow-none hover:bg-muted data-popup-open:bg-muted"
+                  size="sm"
+                >
+                  <span className="flex items-center gap-1.5 whitespace-nowrap">
+                    <BrainIcon className="size-3.5" />
+                    <span>{reasoningLabel}</span>
+                  </span>
+                </SelectTrigger>
+                <SelectContent
+                  align="end"
+                  alignItemWithTrigger={false}
+                  className="w-max min-w-(--anchor-width) rounded-2xl border-0 bg-muted p-1 text-muted-foreground text-xs shadow-none ring-0"
+                  side="top"
+                  sideOffset={6}
+                >
+                  {reasoningEfforts.map((entry) => (
+                    <SelectItem
+                      className="rounded-full py-1.5 pr-8 pl-3 focus:bg-muted data-highlighted:bg-muted/70"
+                      key={entry.id}
+                      value={entry.id}
+                    >
+                      {entry.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+
             {config && config.models.length > 1 && (
               <Select
                 disabled={isBusy}
@@ -74,7 +121,7 @@ export function ChatComposer({
                 value={model}
               >
                 <SelectTrigger
-                  className="h-8 shrink-0 rounded-full border-0 bg-muted/80 px-3 text-muted-foreground text-xs shadow-none hover:bg-muted data-popup-open:bg-muted"
+                  className="h-8 shrink-0 rounded-full border-0 bg-muted px-3 text-muted-foreground text-xs shadow-none hover:bg-muted data-popup-open:bg-muted"
                   size="sm"
                 >
                   <span className="flex items-center gap-1.5 whitespace-nowrap">
@@ -85,7 +132,7 @@ export function ChatComposer({
                 <SelectContent
                   align="end"
                   alignItemWithTrigger={false}
-                  className="w-max min-w-(--anchor-width) rounded-2xl border-0 bg-muted/80 p-1 text-muted-foreground text-xs shadow-none ring-0"
+                  className="w-max min-w-(--anchor-width) rounded-2xl border-0 bg-muted p-1 text-muted-foreground text-xs shadow-none ring-0"
                   side="top"
                   sideOffset={6}
                 >

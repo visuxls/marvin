@@ -17,6 +17,8 @@ describe("fetchConfigure", () => {
     const payload = {
       models: [{ id: "m1", name: "Model 1", builtinTools: [] }],
       builtinTools: [],
+      reasoningEfforts: [{ id: "off", label: "Off" }],
+      defaultReasoningEffort: "off",
     };
     vi.stubGlobal(
       "fetch",
@@ -43,5 +45,24 @@ describe("fetchConfigure", () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
 
     await expect(fetchConfigure()).resolves.toBeNull();
+  });
+
+  it("fills in default reasoning options when the API omits them", async () => {
+    const payload = {
+      models: [{ id: "m1", name: "Model 1", builtinTools: [] }],
+      builtinTools: [],
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => payload,
+      }),
+    );
+
+    await expect(fetchConfigure()).resolves.toMatchObject({
+      defaultReasoningEffort: "off",
+      reasoningEfforts: expect.arrayContaining([{ id: "off", label: "Off" }]),
+    });
   });
 });

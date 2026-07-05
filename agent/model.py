@@ -1,7 +1,22 @@
+from typing import Literal
+
 from pydantic_ai.models.openrouter import OpenRouterModel, OpenRouterModelSettings
 from pydantic_ai.providers.openrouter import OpenRouterProvider
 
 from config import Settings, get_settings
+
+ReasoningSelection = Literal["off", "minimal", "low", "medium", "high", "xhigh"]
+
+DEFAULT_REASONING_EFFORT: ReasoningSelection = "off"
+
+REASONING_EFFORT_OPTIONS: list[tuple[ReasoningSelection, str]] = [
+    ("off", "Off"),
+    ("minimal", "Minimal"),
+    ("low", "Low"),
+    ("medium", "Medium"),
+    ("high", "High"),
+    ("xhigh", "Extra high"),
+]
 
 
 def parse_model_entry(entry: str) -> tuple[str, str]:
@@ -33,7 +48,7 @@ def _openrouter_provider(settings: Settings) -> OpenRouterProvider:
     Returns:
         Configured OpenRouter provider.
     """
-    return OpenRouterProvider(api_key=settings.openrouter_api_key.get_secret_value())
+    return OpenRouterProvider(api_key=settings.OPENROUTER_API_KEY.get_secret_value())
 
 
 def _default_model_id(settings: Settings) -> str:
@@ -46,10 +61,10 @@ def _default_model_id(settings: Settings) -> str:
     Returns:
         Model id for the agent default and single-model UI fallback.
     """
-    if settings.openrouter_models:
-        _, model_id = parse_model_entry(settings.openrouter_models[0])
+    if settings.OPENROUTER_MODELS:
+        _, model_id = parse_model_entry(settings.OPENROUTER_MODELS[0])
         return model_id
-    return settings.openrouter_model
+    return settings.OPENROUTER_MODEL
 
 
 def build_available_models(settings: Settings | None = None) -> dict[str, OpenRouterModel]:
@@ -64,11 +79,11 @@ def build_available_models(settings: Settings | None = None) -> dict[str, OpenRo
     """
     resolved = settings or get_settings()
     provider = _openrouter_provider(resolved)
-    if resolved.openrouter_models:
+    if resolved.OPENROUTER_MODELS:
         return {
             label: OpenRouterModel(model_id, provider=provider)
             for label, model_id in (
-                parse_model_entry(entry) for entry in resolved.openrouter_models
+                parse_model_entry(entry) for entry in resolved.OPENROUTER_MODELS
             )
         }
     model_id = _default_model_id(resolved)
@@ -92,24 +107,36 @@ def build_model(settings: Settings | None = None) -> OpenRouterModel:
     )
 
 
-def build_model_settings(settings: Settings | None = None) -> OpenRouterModelSettings:
+def build_model_settings(
+    settings: Settings | None = None,
+    *,
+    reasoning_effort: ReasoningSelection | None = None,
+) -> OpenRouterModelSettings:
     """
     Create provider routing settings for the OpenRouter model.
 
     Args:
         settings: Optional settings override for tests.
+        reasoning_effort: Optional per-request reasoning effort from the UI.
 
     Returns:
         OpenRouter model settings for agent runs.
     """
     resolved = settings or get_settings()
-    return OpenRouterModelSettings(
-        openrouter_provider={
+    selected_effort = reasoning_effort or DEFAULT_REASONING_EFFORT
+    model_settings: OpenRouterModelSettings = {
+        "openrouter_provider": {
             "order": [
                 provider.strip()
-                for provider in resolved.openrouter_provider_order.split(",")
+                for provider in resolved.OPENROUTER_PROVIDER_ORDER.split(",")
                 if provider.strip()
             ],
-            "allow_fallbacks": resolved.openrouter_allow_fallbacks,
+            "allow_fallbacks": resolved.OPENROUTER_ALLOW_FALLBACKS,
         }
-    )
+    }
+    if selected_effort != "off":
+        model_settings["openrouter_reasoning"] = {
+            "effort": selected_effort,
+            "enabled": True,
+        }
+    return OpenRouterModelSettings(**model_settings)

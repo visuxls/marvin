@@ -252,7 +252,7 @@ def test_get_runway_months_with_positive_burn(tool_ctx, monkeypatch):
 
 
 def test_get_runway_months_without_transactions(test_settings: Settings):
-    imports_dir = test_settings.imports_dir
+    imports_dir = test_settings.IMPORTS_DIR
     (imports_dir / "transactions.csv").unlink()
     import_all(settings=test_settings)
     deps = build_deps(test_settings)

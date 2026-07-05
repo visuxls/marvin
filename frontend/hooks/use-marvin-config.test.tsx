@@ -14,6 +14,11 @@ describe("useMarvinConfig", () => {
         { id: "model-b", name: "Model B", builtinTools: [] },
       ],
       builtinTools: [],
+      reasoningEfforts: [
+        { id: "off", label: "Off" },
+        { id: "high", label: "High" },
+      ],
+      defaultReasoningEffort: "off",
     });
 
     const { result } = renderHook(() => useMarvinConfig());
@@ -23,6 +28,7 @@ describe("useMarvinConfig", () => {
     });
 
     expect(result.current.model).toBe("model-a");
+    expect(result.current.reasoningEffort).toBe("off");
   });
 
   it("leaves state empty when configure fetch fails", async () => {
@@ -45,6 +51,11 @@ describe("useMarvinConfig", () => {
         { id: "model-b", name: "Model B", builtinTools: [] },
       ],
       builtinTools: [],
+      reasoningEfforts: [
+        { id: "off", label: "Off" },
+        { id: "high", label: "High" },
+      ],
+      defaultReasoningEffort: "off",
     });
 
     const { result } = renderHook(() => useMarvinConfig());
@@ -57,5 +68,29 @@ describe("useMarvinConfig", () => {
       result.current.setModel("model-b");
     });
     expect(result.current.model).toBe("model-b");
+  });
+
+  it("allows changing the selected reasoning effort", async () => {
+    vi.mocked(fetchConfigure).mockResolvedValue({
+      models: [{ id: "model-a", name: "Model A", builtinTools: [] }],
+      builtinTools: [],
+      reasoningEfforts: [
+        { id: "off", label: "Off" },
+        { id: "high", label: "High" },
+      ],
+      defaultReasoningEffort: "off",
+    });
+
+    const { result } = renderHook(() => useMarvinConfig());
+
+    await waitFor(() => {
+      expect(result.current.reasoningEffort).toBe("off");
+    });
+
+    act(() => {
+      result.current.setReasoningEffort("high");
+    });
+    expect(result.current.reasoningEffort).toBe("high");
+    expect(localStorage.getItem("marvin:reasoning-effort")).toBe("high");
   });
 });

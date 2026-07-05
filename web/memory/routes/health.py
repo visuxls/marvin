@@ -18,6 +18,6 @@ async def health(settings: SettingsDep) -> HealthResponse:
     Returns:
         Health status payload.
     """
-    with db_connection(settings.db_path) as connection:
+    with db_connection(settings.DB_PATH) as connection:
         connection.execute("SELECT 1")
     return HealthResponse()

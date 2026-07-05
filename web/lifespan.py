@@ -21,7 +21,7 @@ async def lifespan(_app: FastAPI):
     """
     settings = get_settings()
     await asyncio.to_thread(ensure_demo_data, settings)
-    if settings.auto_import_on_startup:
+    if settings.AUTO_IMPORT_ON_STARTUP:
         results = await asyncio.to_thread(import_all)
         log_import_results(results)
     yield

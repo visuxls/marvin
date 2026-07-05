@@ -82,12 +82,12 @@ def test_settings(
     Build settings pointing at temporary paths.
     """
     settings = Settings(
-        openrouter_api_key=SecretStr("test-key"),
-        openrouter_models=[],
-        db_path=db_path,
-        imports_dir=imports_dir,
-        profile_path=profile_path,
-        auto_import_on_startup=False,
+        OPENROUTER_API_KEY=SecretStr("test-key"),
+        OPENROUTER_MODELS=[],
+        DB_PATH=db_path,
+        IMPORTS_DIR=imports_dir,
+        PROFILE_PATH=profile_path,
+        AUTO_IMPORT_ON_STARTUP=False,
     )
     monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
     monkeypatch.setenv("DB_PATH", str(db_path))

@@ -4,7 +4,6 @@ from typing import TypeVar
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic_ai import Agent
-from pydantic_ai.settings import ModelSettings
 from pydantic_ai.ui._web.api import ModelsParam  # private API
 
 from config import get_settings
@@ -22,7 +21,6 @@ def create_marvin_web_app(
     *,
     models: ModelsParam = None,
     deps=None,
-    model_settings: ModelSettings | None = None,
     instructions: str | None = None,
     html_source: str | Path | None = None,
 ) -> FastAPI:
@@ -33,7 +31,6 @@ def create_marvin_web_app(
         agent: Marvin agent instance.
         models: Optional additional models for the UI.
         deps: Dependencies injected into each agent run.
-        model_settings: Optional per-request model settings.
         instructions: Optional per-request instructions.
         html_source: Optional override for the chat UI HTML source.
 
@@ -46,7 +43,6 @@ def create_marvin_web_app(
         agent,
         models=models,
         deps=deps,
-        model_settings=model_settings,
         instructions=instructions,
     )
     app.state.html_source = html_source
@@ -54,7 +50,7 @@ def create_marvin_web_app(
     settings = get_settings()
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.cors_origins,
+        allow_origins=settings.CORS_ORIGINS,
         allow_methods=["*"],
         allow_headers=["*"],
     )

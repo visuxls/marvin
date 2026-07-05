@@ -216,9 +216,7 @@ def test_reconcile_chat_payload_when_last_client_message_is_assistant():
     stored_ui = VercelAIAdapter.dump_messages(stored, sdk_version=VERCEL_AI_SDK_VERSION)
     payload = {
         "trigger": "submit-message",
-        "messages": [
-            message.model_dump(mode="json", by_alias=True) for message in stored_ui
-        ],
+        "messages": [message.model_dump(mode="json", by_alias=True) for message in stored_ui],
     }
     message_history, stripped = reconcile_chat_payload(
         payload,

@@ -17,12 +17,12 @@ def test_parse_model_entry_without_label():
 
 def test_build_available_models_defaults_to_single_model(test_settings: Settings):
     models = build_available_models(test_settings)
-    assert list(models) == [test_settings.openrouter_model]
-    assert models[test_settings.openrouter_model].model_name == test_settings.openrouter_model
+    assert list(models) == [test_settings.OPENROUTER_MODEL]
+    assert models[test_settings.OPENROUTER_MODEL].model_name == test_settings.OPENROUTER_MODEL
 
 
 def test_build_available_models_uses_configured_list(test_settings: Settings):
-    test_settings.openrouter_models = [
+    test_settings.OPENROUTER_MODELS = [
         "GLM:z-ai/glm-5.2",
         "anthropic/claude-sonnet-4",
     ]
@@ -34,11 +34,11 @@ def test_build_available_models_uses_configured_list(test_settings: Settings):
 
 def test_build_model(test_settings: Settings):
     model = build_model(test_settings)
-    assert model.model_name == test_settings.openrouter_model
+    assert model.model_name == test_settings.OPENROUTER_MODEL
 
 
 def test_build_model_uses_first_configured_model(test_settings: Settings):
-    test_settings.openrouter_models = ["GLM:z-ai/glm-5.2", "anthropic/claude-sonnet-4"]
+    test_settings.OPENROUTER_MODELS = ["GLM:z-ai/glm-5.2", "anthropic/claude-sonnet-4"]
     model = build_model(test_settings)
     assert model.model_name == "z-ai/glm-5.2"
 
@@ -47,3 +47,19 @@ def test_build_model_settings(test_settings: Settings):
     settings = build_model_settings(test_settings)
     assert settings["openrouter_provider"]["order"] == ["deepinfra"]
     assert settings["openrouter_provider"]["allow_fallbacks"] is True
+    assert "openrouter_reasoning" not in settings
+
+
+def test_build_model_settings_with_reasoning(test_settings: Settings):
+    settings = build_model_settings(test_settings, reasoning_effort="high")
+    assert settings["openrouter_reasoning"] == {"effort": "high", "enabled": True}
+
+
+def test_build_model_settings_with_xhigh_reasoning(test_settings: Settings):
+    settings = build_model_settings(test_settings, reasoning_effort="xhigh")
+    assert settings["openrouter_reasoning"] == {"effort": "xhigh", "enabled": True}
+
+
+def test_build_model_settings_with_reasoning_off(test_settings: Settings):
+    settings = build_model_settings(test_settings, reasoning_effort="off")
+    assert "openrouter_reasoning" not in settings
