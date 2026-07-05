@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { netWorthYAxisDomain } from "./chart-axis-domain";
+import { netWorthYAxisDomain } from "@/lib/chart-axis-domain";
 
 describe("netWorthYAxisDomain", () => {
   it("pads a tight range instead of starting at zero", () => {

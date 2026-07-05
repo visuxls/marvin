@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { extractChartableTools } from "./extract-chartable-tools";
+import { extractChartableTools } from "@/lib/extract-chartable-tools";
 import {
   bucketAllocationSlices,
   getChartableKind,
   normalizeToolName,
-} from "./finance-tool-charts";
+} from "@/lib/finance-tool-charts";
 
 describe("normalizeToolName", () => {
   it("strips tool- prefix", () => {

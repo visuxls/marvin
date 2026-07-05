@@ -8,64 +8,8 @@ export type PresetQuestion = {
 
 export const PRESET_QUESTIONS: readonly PresetQuestion[] = [
   {
-    id: "health-check",
-    title: "Financial health check",
-    description: "Net worth, allocation, cash flow, and liquidity in one view",
-    prompt:
-      "Give me a complete financial health check: net worth at current market prices, portfolio allocation, unrealized gains, and how my cash compares to invested assets. If transaction data is available, add recent income versus spending, savings rate, and runway from actual burn — otherwise note that cash-flow data is missing. Call out anything that looks off.",
-  },
-  {
-    id: "net-worth-trend",
-    title: "Am I growing?",
-    description: "Net worth trend and what changed over time",
-    prompt:
-      "How has my net worth trended over time? Show the history, summarize the change, and explain what's driving it using my balances and holdings.",
-  },
-  {
-    id: "concentration-risk",
-    title: "Concentration & risk",
-    description: "Largest positions and portfolio weightings",
-    prompt:
-      "Value my holdings at market prices, show portfolio allocation by symbol, and highlight any large concentrations or outsized unrealized gains or losses I should know about.",
-  },
-  {
-    id: "account-breakdown",
-    title: "Where is my money?",
-    description: "Net worth split across every account",
-    prompt:
-      "Break down my net worth by account, list my latest cash balances, and summarize my investment holdings in each brokerage. Tell me which accounts hold the most.",
-  },
-  {
-    id: "cost-vs-market",
-    title: "Book vs. market value",
-    description: "Cost basis net worth against live market prices",
-    prompt:
-      "Compare my net worth at cost basis versus current market prices. Quantify the total gap, rank my holdings by unrealized gain or loss, and explain which positions are driving most of the difference.",
-  },
-  {
-    id: "liquidity-stress",
-    title: "Liquidity stress test",
-    description: "Cash buffers, liquid assets, and runway",
-    prompt:
-      "Run a liquidity stress test: pull my latest cash balances by account, summarize liquid versus invested assets, and assess whether my cash reserves look adequate relative to total net worth. If transaction data is available, use actual monthly burn to estimate runway months at current spending and say whether that buffer feels thin or comfortable — otherwise note that burn-based runway isn't available. Flag any accounts that seem light on cash.",
-  },
-  {
-    id: "winners-losers",
-    title: "Winners & losers",
-    description: "Best and worst performers with allocation context",
-    prompt:
-      "Identify my biggest portfolio winners and losers at market value, show current allocation weights by symbol, and call out any positions that are both large in weight and sitting on heavy unrealized gains or losses.",
-  },
-  {
-    id: "balance-deep-dive",
-    title: "Balance history audit",
-    description: "Month-over-month swings across every account",
-    prompt:
-      "Pull balance history for every account and my net worth over time. Highlight the largest month-over-month swings, name which accounts moved the most, and say whether the overall trend is improving or deteriorating.",
-  },
-  {
     id: "profile-briefing",
-    title: "Personalized CFO briefing",
+    title: "Provide me with a personal CFO briefing.",
     description:
       "Full balance-sheet review tied to your goals, risks, and next steps",
     prompt:
@@ -82,64 +26,120 @@ export const PRESET_QUESTIONS: readonly PresetQuestion[] = [
       "Use actual figures throughout. Lead with insight, not raw data dumps.",
   },
   {
+    id: "health-check",
+    title: "How healthy are my finances?",
+    description: "Net worth, allocation, cash flow, and liquidity in one view",
+    prompt:
+      "Give me a complete financial health check: net worth at current market prices, portfolio allocation, unrealized gains, and how my cash compares to invested assets. If transaction data is available, add recent income versus spending, savings rate, and runway from actual burn — otherwise note that cash-flow data is missing. Call out anything that looks off.",
+  },
+  {
+    id: "net-worth-trend",
+    title: "Am I growing?",
+    description: "Net worth trend and what changed over time",
+    prompt:
+      "How has my net worth trended over time? Show the history, summarize the change, and explain what's driving it using my balances and holdings.",
+  },
+  {
+    id: "concentration-risk",
+    title: "Am I too concentrated in any positions?",
+    description: "Largest positions and portfolio weightings",
+    prompt:
+      "Value my holdings at market prices, show portfolio allocation by symbol, and highlight any large concentrations or outsized unrealized gains or losses I should know about.",
+  },
+  {
+    id: "account-breakdown",
+    title: "Where is my money?",
+    description: "Net worth split across every account",
+    prompt:
+      "Break down my net worth by account, list my latest cash balances, and summarize my investment holdings in each brokerage. Tell me which accounts hold the most.",
+  },
+  {
+    id: "cost-vs-market",
+    title: "How does cost basis compare to market value?",
+    description: "Cost basis net worth against live market prices",
+    prompt:
+      "Compare my net worth at cost basis versus current market prices. Quantify the total gap, rank my holdings by unrealized gain or loss, and explain which positions are driving most of the difference.",
+  },
+  {
+    id: "liquidity-stress",
+    title: "Could I handle a cash crunch?",
+    description: "Cash buffers, liquid assets, and runway",
+    prompt:
+      "Run a liquidity stress test: pull my latest cash balances by account, summarize liquid versus invested assets, and assess whether my cash reserves look adequate relative to total net worth. If transaction data is available, use actual monthly burn to estimate runway months at current spending and say whether that buffer feels thin or comfortable — otherwise note that burn-based runway isn't available. Flag any accounts that seem light on cash.",
+  },
+  {
+    id: "winners-losers",
+    title: "What are my biggest winners and losers?",
+    description: "Best and worst performers with allocation context",
+    prompt:
+      "Identify my biggest portfolio winners and losers at market value, show current allocation weights by symbol, and call out any positions that are both large in weight and sitting on heavy unrealized gains or losses.",
+  },
+  {
+    id: "balance-deep-dive",
+    title: "How have my balances changed over time?",
+    description: "Month-over-month swings across every account",
+    prompt:
+      "Pull balance history for every account and my net worth over time. Highlight the largest month-over-month swings, name which accounts moved the most, and say whether the overall trend is improving or deteriorating.",
+  },
+  {
     id: "quick-snapshot",
-    title: "Quick snapshot",
+    title: "What's my quick financial snapshot?",
     description: "Net worth and cash in under a minute",
     prompt:
       "Give me a quick financial snapshot: total net worth at current market prices, how much is cash versus invested, and which three accounts hold the most. Keep it brief — no deep dives unless something stands out.",
   },
   {
     id: "market-pulse",
-    title: "Live market pulse",
+    title: "What are my holdings worth at current prices?",
     description: "Current prices and book-to-market on every holding",
     prompt:
       "Pull live prices for all my holdings and value the portfolio at market. For each position, show quantity, average cost, current price, market value, and unrealized gain or loss. Summarize total unrealized P&L and flag any position where market value diverges sharply from cost basis.",
   },
   {
     id: "tax-loss-scan",
-    title: "Tax-loss scan",
+    title: "Which positions have losses to harvest?",
     description: "Underwater positions that may warrant a harvest review",
     prompt:
       "Scan my portfolio for tax-loss harvesting candidates. List every holding with an unrealized loss, sorted by largest loss first. For each, show cost basis, market value, loss amount, and portfolio weight. Note wash-sale or holding-period considerations only at a high level — I want a prioritization list, not tax advice.",
   },
   {
     id: "asset-location",
-    title: "Retirement vs. taxable",
+    title: "How is my wealth split between retirement and taxable?",
     description: "How wealth is split across account types",
     prompt:
       "Summarize my liquidity breakdown: cash, taxable investments, retirement accounts, crypto, and credit balances. Show dollar amounts and percentage of total net worth for each bucket. Call out if I'm heavily skewed toward one category relative to a typical allocation for my life stage (use my profile for context).",
   },
   {
     id: "holdings-roster",
-    title: "Full holdings roster",
+    title: "What are all my holdings?",
     description: "Every position with quantity, cost, and market value",
     prompt:
       "List every investment holding I have: symbol, account, quantity, average cost per share, total cost basis, current market price, market value, and unrealized gain or loss. Present it as a clear table-style summary, then note total invested at cost versus total at market.",
   },
   {
     id: "debt-check",
-    title: "Credit & liabilities",
+    title: "How much debt do I have?",
     description: "Outstanding credit balances and how they affect net worth",
     prompt:
       "Focus on debt and credit: list all accounts with credit-card or loan types, show latest balances, and quantify total liabilities. Net them against my assets to show how much they drag on net worth. Flag any account with an unusually large balance from balance history if visible.",
   },
   {
     id: "crypto-exposure",
-    title: "Crypto exposure",
+    title: "What's my crypto exposure?",
     description: "Bitcoin, ether, and crypto weight in the portfolio",
     prompt:
       "Assess my cryptocurrency exposure: identify crypto holdings and accounts, value them at current market prices, and show what percentage of total net worth and of invested assets is in crypto. Compare cost basis to market value and flag if concentration in crypto looks high.",
   },
   {
     id: "rebalance-nudge",
-    title: "Rebalance nudge",
+    title: "Should I rebalance anything?",
     description: "Overweight positions and trim candidates",
     prompt:
       "Show my portfolio allocation by symbol at market prices. Identify positions that are overweight (roughly above 15–20% of invested assets or clearly dominant) and underweight tail holdings. Suggest which symbols I'd trim or diversify away from first — opinionated but based only on current weights, not invented target allocations.",
   },
   {
     id: "emergency-fund",
-    title: "Emergency fund check",
+    title: "Is my emergency fund adequate?",
     description: "Cash reserves vs. actual or estimated monthly expenses",
     prompt:
       "Read my profile, then evaluate my emergency fund: total liquid cash across checking and savings accounts and how many months of expenses that covers. Prefer actual average monthly spending from transaction history when available; otherwise use expense or income notes from my profile. Say whether the reserve looks thin, adequate, or strong. Be specific with dollar amounts.",
@@ -153,28 +153,28 @@ export const PRESET_QUESTIONS: readonly PresetQuestion[] = [
   },
   {
     id: "burn-trend",
-    title: "Spending momentum",
+    title: "Is my spending rising or falling?",
     description: "Month-by-month income, spending, and net burn",
     prompt:
       "Pull my monthly burn trend for the last six months. For each month show income, total spending, and net burn. Summarize whether spending is rising, falling, or flat, identify the best and worst months for cash flow, and explain what's driving any changes you see.",
   },
   {
     id: "runway-analysis",
-    title: "Real runway",
+    title: "How many months of runway do I have?",
     description: "Months of runway from liquid cash and actual spending",
     prompt:
       "Calculate my runway using real transaction history: average monthly burn from recent months and total liquid cash in checking and savings. Show how many months I can cover at current spending, read my profile to assess whether that runway fits my employment situation and goals, and flag if reserves look tight or comfortable.",
   },
   {
     id: "savings-rate",
-    title: "Living within my means?",
+    title: "Am I living within my means?",
     description: "Income vs. spending and monthly savings rate",
     prompt:
       "Using my transaction history, compare total income to total spending over the last three months. Calculate my effective savings rate (net surplus or deficit as a percent of income), show the month-by-month breakdown, and read my profile to assess whether this pace aligns with my stated goals. Be direct about whether I'm ahead or behind.",
   },
   {
     id: "fixed-costs",
-    title: "Fixed cost audit",
+    title: "What are my recurring fixed costs?",
     description: "Recurring bills and their share of income",
     prompt:
       "Review my transactions to identify recurring fixed costs — rent, debt payments, subscriptions, memberships, transit passes, and similar repeating charges. Estimate total monthly fixed obligations, list each line item with its amount, and calculate what percentage of my average monthly income they consume. Highlight anything that looks trimmable without major lifestyle change.",

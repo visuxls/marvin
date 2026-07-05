@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parseToolDecimal } from "./parse-tool-decimal";
+import { parseToolDecimal } from "@/lib/parse-tool-decimal";
 
 describe("parseToolDecimal", () => {
   it("parses finite numbers", () => {

@@ -37,15 +37,17 @@ describe("ChatPresetQuestions", () => {
       />
     );
 
-    expect(screen.getByText("Financial health check")).toBeInTheDocument();
+    expect(screen.getByText("How healthy are my finances?")).toBeInTheDocument();
     expect(screen.getByText("Am I growing?")).toBeInTheDocument();
-    expect(screen.getByText("Concentration & risk")).toBeInTheDocument();
+    expect(screen.getByText("Am I too concentrated in any positions?")).toBeInTheDocument();
     expect(screen.getByText("Where is my money?")).toBeInTheDocument();
   });
 
   it("sends the full prompt when a card is clicked", async () => {
     const user = userEvent.setup();
     const onSelect = vi.fn();
+
+    const healthCheck = PRESET_QUESTIONS.find((q) => q.id === "health-check")!;
 
     render(
       <ChatPresetQuestions
@@ -54,9 +56,9 @@ describe("ChatPresetQuestions", () => {
       />
     );
 
-    await user.click(screen.getByRole("button", { name: /Financial health check/i }));
+    await user.click(screen.getByRole("button", { name: /How healthy are my finances/i }));
 
-    expect(onSelect).toHaveBeenCalledWith(PRESET_QUESTIONS[0].prompt);
+    expect(onSelect).toHaveBeenCalledWith(healthCheck.prompt);
   });
 
   it("disables cards when busy", () => {

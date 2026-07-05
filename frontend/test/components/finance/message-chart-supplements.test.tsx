@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { MessageChartSupplements } from "./message-chart-supplements";
+import { MessageChartSupplements } from "@/components/finance/message-chart-supplements";
 
 vi.mock("recharts", () => {
   const Mock = ({

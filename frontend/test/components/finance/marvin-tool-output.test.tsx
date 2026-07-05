@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-import { MarvinToolOutput } from "./marvin-tool-output";
+import { MarvinToolOutput } from "@/components/finance/marvin-tool-output";
 
 vi.mock("@/components/ai-elements/code-block", () => ({
   CodeBlock: ({ code }: { code: string }) => <pre>{code}</pre>,

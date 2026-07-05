@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { spendingCategoryAxisWidth } from "./spending-chart-axis";
+import { spendingCategoryAxisWidth } from "@/components/finance/spending-chart-axis";
 
 describe("spendingCategoryAxisWidth", () => {
   it("widens the axis for long category names", () => {

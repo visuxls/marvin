@@ -19,7 +19,7 @@ This file is for humans and coding agents working in `frontend/`. For the Python
 - **AI Elements** — chat primitives in `components/ai-elements/` (conversation, message, tool, reasoning)
 - **shadcn/ui** — Radix/Base UI primitives in `components/ui/` (`components.json`, style `base-nova`)
 - **Tailwind CSS 4** — `app/globals.css`, utility-first layout
-- **Vitest + Testing Library** — unit/component tests (`*.test.ts`, `*.test.tsx`)
+- **Vitest + Testing Library** — unit/component tests in `test/` (mirrors source layout)
 - **next-themes** — light/dark via `ThemeProvider`
 
 ## Directory layout
@@ -58,6 +58,11 @@ lib/
   utils.ts                  cn() helper (clsx + tailwind-merge)
 test/
   test-utils.tsx            Shared render helpers for Vitest
+  app/                      API route tests
+  components/               Component tests (mirrors components/)
+  contexts/                 Context tests
+  hooks/                    Hook tests
+  lib/                      Pure helper tests
 vitest.config.ts            Vitest + jsdom + @ alias
 vitest.setup.ts             @testing-library/jest-dom
 next.config.ts              Next config (minimal)
@@ -147,7 +152,7 @@ Keep changes scoped to the right layer. Prefer extending existing hooks and `lib
 - Match existing naming and patterns in the file you edit.
 - No over-abstraction (no one-line helpers unless reused).
 - Comments only for non-obvious behavior (e.g. hydration placeholders, deferred error handling).
-- Colocate tests as `*.test.ts` / `*.test.tsx` next to the module under test.
+- Add tests under `test/` mirroring the source path (e.g. `components/chat-composer.tsx` → `test/components/chat-composer.test.tsx`).
 - Do not add financial calculations in the frontend — all numbers come from Marvin agent tools via the backend.
 
 ## Running locally
@@ -185,7 +190,7 @@ npm run test:watch    # vitest watch mode
 - **Vitest** with **jsdom**, globals enabled (`vitest.config.ts`).
 - **Testing Library** for components; `test/test-utils.tsx` for shared providers.
 - Mock `fetch` in `lib/` tests; component tests mock hooks or context as needed.
-- Proxy behavior tested in `app/api/[...path]/route.test.ts`.
+- Proxy behavior tested in `test/app/api/[...path]/route.test.ts`.
 - Run `npm run typecheck` and `npm test` before merging frontend changes.
 
 ## Finance charts

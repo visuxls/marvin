@@ -4,6 +4,7 @@ describe("PRESET_QUESTIONS", () => {
   it("includes multi-step finance prompts", () => {
     expect(PRESET_QUESTIONS.length).toBeGreaterThanOrEqual(9);
     expect(PRESET_QUESTIONS.map((question) => question.id)).toEqual([
+      "profile-briefing",
       "health-check",
       "net-worth-trend",
       "concentration-risk",
@@ -12,7 +13,6 @@ describe("PRESET_QUESTIONS", () => {
       "liquidity-stress",
       "winners-losers",
       "balance-deep-dive",
-      "profile-briefing",
       "quick-snapshot",
       "market-pulse",
       "tax-loss-scan",
