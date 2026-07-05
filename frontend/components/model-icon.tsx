@@ -1,7 +1,14 @@
 "use client";
 
+import {
+  AnthropicIcon,
+  DeepSeekIcon,
+  OpenAIIcon,
+  ZAIIcon,
+} from "@/components/provider-icons";
 import { cn } from "@/lib/utils";
 import { BotIcon } from "lucide-react";
+import type { ComponentType } from "react";
 
 interface MarvinModelIconProps {
   modelId: string;
@@ -9,14 +16,23 @@ interface MarvinModelIconProps {
   size?: number;
 }
 
+type ProviderIconComponent = ComponentType<{
+  className?: string;
+  size?: number;
+}>;
+
+const PROVIDER_ICONS: Record<string, ProviderIconComponent> = {
+  anthropic: AnthropicIcon,
+  openai: OpenAIIcon,
+  deepseek: DeepSeekIcon,
+  "z-ai": ZAIIcon,
+};
+
 const PROVIDER_COLORS: Record<string, string> = {
-  anthropic: "bg-orange-500",
-  openai: "bg-emerald-600",
   google: "bg-blue-500",
   meta: "bg-sky-600",
   mistral: "bg-violet-500",
   cohere: "bg-pink-500",
-  deepseek: "bg-indigo-500",
   qwen: "bg-cyan-600",
 };
 
@@ -36,6 +52,14 @@ export function MarvinModelIcon({
   size = 14,
 }: MarvinModelIconProps) {
   const provider = providerKey(modelId);
+  const ProviderIcon = PROVIDER_ICONS[provider];
+
+  if (ProviderIcon) {
+    return (
+      <ProviderIcon className={cn("shrink-0", className)} size={size} />
+    );
+  }
+
   const colorClass = PROVIDER_COLORS[provider];
 
   if (!colorClass) {

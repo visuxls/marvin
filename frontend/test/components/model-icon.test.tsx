@@ -2,16 +2,48 @@ import { MarvinModelIcon } from "@/components/model-icon";
 import { render, screen } from "@testing-library/react";
 
 describe("MarvinModelIcon", () => {
-  it("renders a provider initial for known models", () => {
-    render(<MarvinModelIcon modelId="openrouter:anthropic/claude-sonnet" />);
+  it("renders the Anthropic brand icon for Claude models", () => {
+    const { container } = render(
+      <MarvinModelIcon modelId="openrouter:anthropic/claude-sonnet" />
+    );
 
-    expect(screen.getByText("A")).toBeInTheDocument();
+    expect(container.querySelector("svg")).toBeInTheDocument();
+    expect(screen.queryByText("A")).not.toBeInTheDocument();
+  });
+
+  it("renders the OpenAI brand icon for GPT models", () => {
+    const { container } = render(
+      <MarvinModelIcon modelId="openrouter:openai/gpt-4.1" />
+    );
+
+    expect(container.querySelector("svg")).toBeInTheDocument();
+    expect(screen.queryByText("O")).not.toBeInTheDocument();
+  });
+
+  it("renders the DeepSeek brand icon for DeepSeek models", () => {
+    const { container } = render(
+      <MarvinModelIcon modelId="openrouter:deepseek/deepseek-chat" />
+    );
+
+    expect(container.querySelector("svg")).toBeInTheDocument();
+    expect(screen.queryByText("D")).not.toBeInTheDocument();
+  });
+
+  it("renders the Z.AI brand icon for GLM models", () => {
+    const { container } = render(
+      <MarvinModelIcon modelId="openrouter:z-ai/glm-5.2" />
+    );
+
+    expect(container.querySelector("svg")).toBeInTheDocument();
+    expect(screen.queryByText("Z")).not.toBeInTheDocument();
   });
 
   it("strips the openrouter prefix before resolving the provider", () => {
-    render(<MarvinModelIcon modelId="anthropic/claude-sonnet" />);
+    const { container } = render(
+      <MarvinModelIcon modelId="anthropic/claude-sonnet" />
+    );
 
-    expect(screen.getByText("A")).toBeInTheDocument();
+    expect(container.querySelector("svg")).toBeInTheDocument();
   });
 
   it("falls back to a bot icon for unknown providers", () => {
