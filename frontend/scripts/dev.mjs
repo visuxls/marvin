@@ -5,6 +5,7 @@ import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 const nextBin = require.resolve("next/dist/bin/next");
 
+const quiet = process.env.MARVIN_QUIET === "1";
 const localUrlPattern = /Local:\s+(https?:\/\/\S+)/;
 
 let localUrl = null;
@@ -22,7 +23,9 @@ const child = spawn(
 function watchStream(stream, writer) {
   const rl = createInterface({ input: stream });
   rl.on("line", (line) => {
-    writer.write(`${line}\n`);
+    if (!quiet) {
+      writer.write(`${line}\n`);
+    }
     maybeScheduleOpen(line);
   });
 }
