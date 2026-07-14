@@ -66,6 +66,8 @@ From the repo root:
 ./start.sh
 ```
 
+![Marvin CLI startup](docs/images/cli.png)
+
 This starts the API on http://127.0.0.1:7932 and the chat UI on http://localhost:3000. The chat UI will automatically be opened in your default browser.
 
 To run them separately:
