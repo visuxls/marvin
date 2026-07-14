@@ -9,6 +9,7 @@ from config import Settings, get_settings
 from ingestion.csv_loader import load_csv_rows
 from models.finance import AccountChildRow, AccountRow, BalanceRow, HoldingRow, TransactionRow
 from storage.repository import (
+    delete_holdings_not_in,
     get_account_ids,
     upsert_account,
     upsert_balance,
@@ -31,6 +32,7 @@ class ImportResult:
     file: str
     inserted: int = 0
     updated: int = 0
+    deleted: int = 0
     skipped: int = 0
     errors: list[str] = field(default_factory=list)
 
@@ -126,23 +128,37 @@ def import_balances(connection: sqlite3.Connection, imports_dir: Path) -> Import
 
 def import_holdings(connection: sqlite3.Connection, imports_dir: Path) -> ImportResult:
     """
-    Load holdings.csv and upsert each row into the database.
+    Load holdings.csv, upsert each row, and remove positions absent from the file.
 
     Args:
         connection: Open SQLite connection used for the import.
         imports_dir: Directory containing holdings.csv.
 
     Returns:
-        Import summary with insert/update/skip counts and validation errors.
+        Import summary with insert/update/delete/skip counts and validation errors.
     """
-    return _import_account_children(
-        connection,
-        imports_dir,
-        filename="holdings.csv",
-        model=HoldingRow,
-        upsert=upsert_holding,
-        row_label=lambda row: row.symbol,
-    )
+    path = imports_dir / "holdings.csv"
+    rows, errors = load_csv_rows(path, HoldingRow)
+    result = ImportResult(file=path.name, errors=errors)
+    known_accounts = get_account_ids(connection)
+    keep: set[tuple[str, str]] = set()
+
+    for row in rows:
+        if row.account_id not in known_accounts:
+            result.skipped += 1
+            result.errors.append(
+                f"{path.name}: skipped {row.symbol} — unknown Account ID '{row.account_id}'"
+            )
+            continue
+
+        keep.add((row.account_id, row.symbol))
+        if upsert_holding(connection, row):
+            result.inserted += 1
+        else:
+            result.updated += 1
+
+    result.deleted = delete_holdings_not_in(connection, keep)
+    return result
 
 
 def import_transactions(connection: sqlite3.Connection, imports_dir: Path) -> ImportResult:
@@ -175,10 +191,11 @@ def log_import_results(results: list[ImportResult]) -> None:
     """
     for result in results:
         logger.info(
-            "%s: %s inserted, %s updated, %s skipped",
+            "%s: %s inserted, %s updated, %s deleted, %s skipped",
             result.file,
             result.inserted,
             result.updated,
+            result.deleted,
             result.skipped,
         )
         for error in result.errors:

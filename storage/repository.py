@@ -87,6 +87,36 @@ def upsert_holding(connection: sqlite3.Connection, row: HoldingRow) -> bool:
     return existing is None
 
 
+def delete_holdings_not_in(
+    connection: sqlite3.Connection,
+    keep: set[tuple[str, str]],
+) -> int:
+    """
+    Delete holdings whose (account_id, symbol) pair is not in ``keep``.
+
+    Holdings CSV is the source of truth for current positions, so symbols
+    removed from the file are deleted from the database on import.
+
+    Args:
+        connection: Open SQLite connection used for the write.
+        keep: Account/symbol pairs that should remain after import.
+
+    Returns:
+        Number of holding rows deleted.
+    """
+    existing = connection.execute("SELECT account_id, symbol FROM holdings").fetchall()
+    deleted = 0
+    for row in existing:
+        key = (row["account_id"], row["symbol"])
+        if key not in keep:
+            connection.execute(
+                "DELETE FROM holdings WHERE account_id = ? AND symbol = ?",
+                key,
+            )
+            deleted += 1
+    return deleted
+
+
 def upsert_balance(connection: sqlite3.Connection, row: BalanceRow) -> bool:
     """
     Insert or update a balance snapshot keyed by account_id and date.

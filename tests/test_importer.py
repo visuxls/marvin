@@ -22,7 +22,29 @@ def test_import_all_is_idempotent(test_settings: Settings):
     assert results[0].updated == 2
     assert results[1].updated == 2
     assert results[2].updated == 2
+    assert results[2].deleted == 0
     assert results[3].updated == 3
+
+
+def test_import_holdings_deletes_removed_symbols(tmp_path: Path, test_settings: Settings):
+    import_all(settings=test_settings)
+    holdings = tmp_path / "imports" / "holdings.csv"
+    holdings.write_text(
+        "Account ID,Symbol,Quantity,Cost Basis\n3,VOO,10,400.00\n",
+        encoding="utf-8",
+    )
+    results = import_all(settings=test_settings)
+    holdings_result = results[2]
+    assert holdings_result.updated == 1
+    assert holdings_result.deleted == 1
+
+    from storage.queries import get_holdings
+    from storage.session import db_connection
+
+    with db_connection(test_settings.DB_PATH) as connection:
+        remaining = get_holdings(connection)
+    assert len(remaining) == 1
+    assert remaining[0].symbol == "VOO"
 
 
 def test_import_skips_unknown_account(tmp_path: Path, test_settings: Settings):
