@@ -38,6 +38,15 @@ describe("MarvinModelIcon", () => {
     expect(screen.queryByText("Z")).not.toBeInTheDocument();
   });
 
+  it("renders the xAI brand icon for Grok models", () => {
+    const { container } = render(
+      <MarvinModelIcon modelId="openrouter:x-ai/grok-4.5" />
+    );
+
+    expect(container.querySelector("svg")).toBeInTheDocument();
+    expect(screen.queryByText("X")).not.toBeInTheDocument();
+  });
+
   it("strips the openrouter prefix before resolving the provider", () => {
     const { container } = render(
       <MarvinModelIcon modelId="anthropic/claude-sonnet" />

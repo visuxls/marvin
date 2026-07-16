@@ -4,6 +4,7 @@ import {
   AnthropicIcon,
   DeepSeekIcon,
   OpenAIIcon,
+  XAIIcon,
   ZAIIcon,
 } from "@/components/provider-icons";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,7 @@ const PROVIDER_ICONS: Record<string, ProviderIconComponent> = {
   anthropic: AnthropicIcon,
   openai: OpenAIIcon,
   deepseek: DeepSeekIcon,
+  "x-ai": XAIIcon,
   "z-ai": ZAIIcon,
 };
 
