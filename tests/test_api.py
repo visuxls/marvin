@@ -291,6 +291,44 @@ def test_post_chat_applies_reasoning_effort(test_settings: Settings, monkeypatch
     }
 
 
+def test_post_chat_passes_session_id(test_settings: Settings, monkeypatch):
+    monkeypatch.setattr("web.dependencies.get_app_settings", lambda: test_settings)
+    agent = Agent(TestModel(), deps_type=CFODeps)
+    app = _build_api_app(
+        agent,
+        deps=CFODeps(
+            db_path=test_settings.DB_PATH,
+            profile_path=test_settings.PROFILE_PATH,
+        ),
+    )
+
+    captured = {}
+
+    async def fake_dispatch(*args, **kwargs):
+        captured["model_settings"] = kwargs.get("model_settings")
+        return JSONResponse({"ok": True})
+
+    adapter = MagicMock()
+    adapter.run_input = MagicMock(__pydantic_extra__={})
+    adapter.dispatch_request = fake_dispatch
+
+    with patch(
+        "web.memory.routes.chat.VercelAIAdapter.from_request",
+        new=AsyncMock(return_value=adapter),
+    ):
+        client = TestClient(app)
+        response = client.post(
+            "/api/chat",
+            json={
+                "id": "conv-sticky",
+                "messages": [{"role": "user", "content": "hi"}],
+            },
+        )
+
+    assert response.status_code == 200
+    assert captured["model_settings"]["extra_body"] == {"session_id": "conv-sticky"}
+
+
 def test_post_chat_rejects_invalid_reasoning_effort(api_app):
     adapter = MagicMock()
     adapter.run_input = MagicMock(__pydantic_extra__={})

@@ -43,23 +43,29 @@ def test_build_model_uses_first_configured_model(test_settings: Settings):
     assert model.model_name == "z-ai/glm-5.2"
 
 
-def test_build_model_settings(test_settings: Settings):
-    settings = build_model_settings(test_settings)
-    assert settings["openrouter_provider"]["order"] == ["deepinfra"]
-    assert settings["openrouter_provider"]["allow_fallbacks"] is True
+def test_build_model_settings():
+    settings = build_model_settings()
+    assert "openrouter_provider" not in settings
+    assert "extra_body" not in settings
     assert "openrouter_reasoning" not in settings
 
 
-def test_build_model_settings_with_reasoning(test_settings: Settings):
-    settings = build_model_settings(test_settings, reasoning_effort="high")
+def test_build_model_settings_with_session_id():
+    settings = build_model_settings(session_id="conv-1")
+    assert settings["extra_body"] == {"session_id": "conv-1"}
+    assert "openrouter_provider" not in settings
+
+
+def test_build_model_settings_with_reasoning():
+    settings = build_model_settings(reasoning_effort="high")
     assert settings["openrouter_reasoning"] == {"effort": "high", "enabled": True}
 
 
-def test_build_model_settings_with_xhigh_reasoning(test_settings: Settings):
-    settings = build_model_settings(test_settings, reasoning_effort="xhigh")
+def test_build_model_settings_with_xhigh_reasoning():
+    settings = build_model_settings(reasoning_effort="xhigh")
     assert settings["openrouter_reasoning"] == {"effort": "xhigh", "enabled": True}
 
 
-def test_build_model_settings_with_reasoning_off(test_settings: Settings):
-    settings = build_model_settings(test_settings, reasoning_effort="off")
+def test_build_model_settings_with_reasoning_off():
+    settings = build_model_settings(reasoning_effort="off")
     assert "openrouter_reasoning" not in settings

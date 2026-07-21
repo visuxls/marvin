@@ -108,32 +108,28 @@ def build_model(settings: Settings | None = None) -> OpenRouterModel:
 
 
 def build_model_settings(
-    settings: Settings | None = None,
     *,
     reasoning_effort: ReasoningSelection | None = None,
+    session_id: str | None = None,
 ) -> OpenRouterModelSettings:
     """
-    Create provider routing settings for the OpenRouter model.
+    Create OpenRouter model settings for an agent run.
+
+    Omits explicit provider routing so OpenRouter can pick a cheap endpoint and
+    sticky-route follow-ups. When ``session_id`` is set (typically the chat
+    conversation id), sticky routing activates on the first successful request.
 
     Args:
-        settings: Optional settings override for tests.
         reasoning_effort: Optional per-request reasoning effort from the UI.
+        session_id: Optional OpenRouter session id for provider sticky routing.
 
     Returns:
         OpenRouter model settings for agent runs.
     """
-    resolved = settings or get_settings()
     selected_effort = reasoning_effort or DEFAULT_REASONING_EFFORT
-    model_settings: OpenRouterModelSettings = {
-        "openrouter_provider": {
-            "order": [
-                provider.strip()
-                for provider in resolved.OPENROUTER_PROVIDER_ORDER.split(",")
-                if provider.strip()
-            ],
-            "allow_fallbacks": resolved.OPENROUTER_ALLOW_FALLBACKS,
-        }
-    }
+    model_settings: OpenRouterModelSettings = {}
+    if session_id:
+        model_settings["extra_body"] = {"session_id": session_id}
     if selected_effort != "off":
         model_settings["openrouter_reasoning"] = {
             "effort": selected_effort,

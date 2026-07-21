@@ -14,8 +14,6 @@ class Settings(BaseSettings):
     OPENROUTER_API_KEY: SecretStr
     OPENROUTER_MODEL: str = "z-ai/glm-5.2"
     OPENROUTER_MODELS: Annotated[list[str], NoDecode] = Field(default_factory=list)
-    OPENROUTER_PROVIDER_ORDER: str = "deepinfra"
-    OPENROUTER_ALLOW_FALLBACKS: bool = True
 
     DB_PATH: Path = Path("data/marvin.db")
     IMPORTS_DIR: Path = Path("data/imports")

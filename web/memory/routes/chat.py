@@ -102,8 +102,8 @@ async def post_chat(
     ]
     request_capabilities = [NativeTool(tool) for tool in request_native_tools]
     request_model_settings = build_model_settings(
-        settings,
         reasoning_effort=resolve_reasoning_effort(chat_options),
+        session_id=conversation_id,
     )
 
     return await adapter.dispatch_request(
