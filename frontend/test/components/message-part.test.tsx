@@ -48,10 +48,39 @@ describe("ThinkingGroup", () => {
     await user.click(screen.getByRole("button", { name: /thought for/i }));
 
     expect(screen.getByText("Checking holdings.")).toBeInTheDocument();
+    expect(screen.getByText("Checking holdings.")).toHaveAttribute(
+      "data-mode",
+      "static"
+    );
     expect(screen.getByText("Holdings")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /holdings/i }));
     expect(screen.getByRole("button", { name: /raw data/i })).toBeInTheDocument();
     expect(screen.queryByText("You have three positions.")).not.toBeInTheDocument();
+  });
+
+  it("renders plain text while reasoning is streaming", () => {
+    const message: UIMessage = {
+      id: "a2",
+      role: "assistant",
+      parts: [{ type: "reasoning", text: "Still thinking about Austin…" }],
+    };
+
+    render(
+      <ThinkingGroup
+        chatStatus="streaming"
+        group={{
+          type: "thinking",
+          startIndex: 0,
+          parts: message.parts,
+        }}
+        isLastMessage={true}
+        message={message}
+      />
+    );
+
+    const text = screen.getByText("Still thinking about Austin…");
+    expect(text.tagName).toBe("P");
+    expect(text).not.toHaveAttribute("data-mode");
   });
 });
 

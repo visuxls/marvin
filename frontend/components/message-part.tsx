@@ -172,21 +172,30 @@ export function ThinkingGroup({
     .map((part) => part.text)
     .join("\n\n");
   const toolParts = group.parts.filter(isToolPart);
+  // Avoid Streamdown while reasoning tokens stream — its streaming setState path
+  // can exceed React's nested update limit on long Extra-high runs (streamdown#140).
+  const streaming = isThinkingGroupStreaming(
+    chatStatus,
+    message,
+    group,
+    isLastMessage
+  );
 
   return (
-    <Reasoning
-      isStreaming={isThinkingGroupStreaming(
-        chatStatus,
-        message,
-        group,
-        isLastMessage
-      )}
-    >
+    <Reasoning isStreaming={streaming}>
       <ReasoningTrigger />
       <ReasoningContent>
         <div className="space-y-3">
           {reasoningText ? (
-            <Streamdown plugins={streamdownPlugins}>{reasoningText}</Streamdown>
+            streaming ? (
+              <p className="whitespace-pre-wrap text-muted-foreground">
+                {reasoningText}
+              </p>
+            ) : (
+              <Streamdown mode="static" plugins={streamdownPlugins}>
+                {reasoningText}
+              </Streamdown>
+            )
           ) : null}
           {toolParts.map((toolPart) => (
             <MarvinToolPart

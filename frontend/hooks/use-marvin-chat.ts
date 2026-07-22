@@ -50,8 +50,9 @@ export function useMarvinChat({
     transport,
     id: conversationId,
     // Batch stream updates so Streamdown/markdown re-renders do not exceed React's
-    // nested update limit on long tool-heavy replies (see AI SDK troubleshooting).
-    experimental_throttle: 50,
+    // nested update limit on long Extra-high reasoning / tool-heavy replies
+    // (see AI SDK troubleshooting + streamdown#140).
+    experimental_throttle: 100,
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses,
   });
 
