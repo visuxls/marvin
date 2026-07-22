@@ -36,12 +36,11 @@ components/
   chat-composer.tsx       Input, model picker, stop/send
   message-part.tsx        Per-part renderer (text, tool, reasoning)
   finance/                Secondary tool charts and JSON-only tool output
-  model-icon.tsx          Model provider icons in composer
   theme-provider.tsx      next-themes wrapper
   theme-toggle.tsx        Light/dark control
   sidebar/                Conversation list, mobile menu, brand header
-  ai-elements/            Vercel AI Elements chat building blocks
-  ui/                     shadcn/ui primitives (button, select, sheet, …)
+  ai-elements/            Vercel AI Elements chat building blocks (incl. model-selector)
+  ui/                     shadcn/ui primitives (button, select, dialog, command, …)
 contexts/
   conversations-context.tsx  Sidebar list state, search, pin/delete
 hooks/
@@ -53,6 +52,7 @@ lib/
   marvin-api.ts             API base URL, configure fetch, chat URL
   conversations.ts          Conversation CRUD + message fetch helpers
   chat-suggestions.ts       Empty-state preset prompts
+  model-provider.ts         Provider key/logo/group helpers for model selector
   constants.ts              sessionStorage key, layout classes
   format-relative-time.ts   Sidebar timestamps
   utils.ts                  cn() helper (clsx + tailwind-merge)

@@ -1,6 +1,17 @@
 "use client";
 
-import { MarvinModelIcon } from "@/components/model-icon";
+import {
+  ModelSelector,
+  ModelSelectorContent,
+  ModelSelectorEmpty,
+  ModelSelectorGroup,
+  ModelSelectorInput,
+  ModelSelectorItem,
+  ModelSelectorList,
+  ModelSelectorLogo,
+  ModelSelectorName,
+  ModelSelectorTrigger,
+} from "@/components/ai-elements/model-selector";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,9 +21,17 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import type { MarvinConfigure, ReasoningEffortId } from "@/lib/marvin-api";
+import {
+  groupModelsByProvider,
+  providerLogoSlug,
+} from "@/lib/model-provider";
 import { cn } from "@/lib/utils";
 import { ArrowUpIcon, BrainIcon, SquareIcon } from "lucide-react";
-import type { FormEvent, KeyboardEvent } from "react";
+import { useMemo, useState, type FormEvent, type KeyboardEvent } from "react";
+
+/** Shared pill chrome for model + reasoning composer controls. */
+const COMPOSER_CONTROL_TRIGGER_CLASS =
+  "h-8 shrink-0 gap-1.5 rounded-full border-0 bg-muted px-3 text-muted-foreground text-xs shadow-none hover:bg-muted data-popup-open:bg-muted aria-expanded:bg-muted";
 
 interface ChatComposerProps {
   input: string;
@@ -39,6 +58,8 @@ export function ChatComposer({
   reasoningEffort,
   onReasoningEffortChange,
 }: ChatComposerProps) {
+  const [modelSelectorOpen, setModelSelectorOpen] = useState(false);
+
   const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
@@ -53,6 +74,15 @@ export function ChatComposer({
     reasoningEfforts.find((entry) => entry.id === reasoningEffort)?.label ??
     "Reasoning";
   const canSend = isBusy || Boolean(input.trim());
+  const modelGroups = useMemo(
+    () => groupModelsByProvider(config?.models ?? []),
+    [config?.models],
+  );
+
+  const handleModelSelect = (modelId: string) => {
+    onModelChange(modelId);
+    setModelSelectorOpen(false);
+  };
 
   return (
     <form className="w-full" onSubmit={onSubmit}>
@@ -82,24 +112,29 @@ export function ChatComposer({
                 value={reasoningEffort}
               >
                 <SelectTrigger
-                  className="h-8 shrink-0 rounded-full border-0 bg-muted px-3 text-muted-foreground text-xs shadow-none hover:bg-muted data-popup-open:bg-muted"
-                  size="sm"
+                  className={cn(
+                    COMPOSER_CONTROL_TRIGGER_CLASS,
+                    // Hide Select's trailing chevron (direct svg child).
+                    "[&>svg]:hidden",
+                  )}
                 >
-                  <span className="flex items-center gap-1.5 whitespace-nowrap">
-                    <BrainIcon className="size-3.5" />
-                    <span>{reasoningLabel}</span>
+                  <span className="flex items-center gap-1.5">
+                    <BrainIcon className="size-3 shrink-0" />
+                    <span className="flex-none truncate text-left">
+                      {reasoningLabel}
+                    </span>
                   </span>
                 </SelectTrigger>
                 <SelectContent
                   align="end"
                   alignItemWithTrigger={false}
-                  className="w-max min-w-(--anchor-width) rounded-2xl border-0 bg-muted p-1 text-muted-foreground text-xs shadow-none ring-0"
+                  className="w-max min-w-40 rounded-xl border-0 bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10"
                   side="top"
                   sideOffset={6}
                 >
                   {reasoningEfforts.map((entry) => (
                     <SelectItem
-                      className="rounded-full py-1.5 pr-8 pl-3 focus:bg-muted data-highlighted:bg-muted/70"
+                      className="cursor-default rounded-lg py-1.5 pr-8 pl-2 text-sm focus:bg-muted focus:text-foreground data-highlighted:bg-muted"
                       key={entry.id}
                       value={entry.id}
                     >
@@ -111,43 +146,51 @@ export function ChatComposer({
             )}
 
             {config && config.models.length > 1 && (
-              <Select
-                disabled={isBusy}
-                onValueChange={(value) => {
-                  if (value) {
-                    onModelChange(value);
-                  }
-                }}
-                value={model}
+              <ModelSelector
+                onOpenChange={setModelSelectorOpen}
+                open={modelSelectorOpen}
               >
-                <SelectTrigger
-                  className="h-8 shrink-0 rounded-full border-0 bg-muted px-3 text-muted-foreground text-xs shadow-none hover:bg-muted data-popup-open:bg-muted"
-                  size="sm"
+                <ModelSelectorTrigger
+                  disabled={isBusy}
+                  render={
+                    <Button
+                      className={COMPOSER_CONTROL_TRIGGER_CLASS}
+                      disabled={isBusy}
+                      size="sm"
+                      type="button"
+                      variant="ghost"
+                    />
+                  }
                 >
-                  <span className="flex items-center gap-1.5 whitespace-nowrap">
-                    <MarvinModelIcon modelId={model} />
-                    <span>{modelLabel}</span>
-                  </span>
-                </SelectTrigger>
-                <SelectContent
-                  align="end"
-                  alignItemWithTrigger={false}
-                  className="w-max min-w-(--anchor-width) rounded-2xl border-0 bg-muted p-1 text-muted-foreground text-xs shadow-none ring-0"
-                  side="top"
-                  sideOffset={6}
-                >
-                  {config.models.map((entry) => (
-                    <SelectItem
-                      className="rounded-full py-1.5 pr-8 pl-3 focus:bg-muted data-highlighted:bg-muted/70"
-                      key={entry.id}
-                      value={entry.id}
-                    >
-                      <MarvinModelIcon modelId={entry.id} />
-                      {entry.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                  <ModelSelectorLogo provider={providerLogoSlug(model)} />
+                  <ModelSelectorName className="flex-none">
+                    {modelLabel}
+                  </ModelSelectorName>
+                </ModelSelectorTrigger>
+                <ModelSelectorContent showCloseButton={false} title="Select model">
+                  <ModelSelectorInput placeholder="Search models..." />
+                  <ModelSelectorList>
+                    <ModelSelectorEmpty>No models found.</ModelSelectorEmpty>
+                    {modelGroups.map((group) => (
+                      <ModelSelectorGroup heading={group.label} key={group.key}>
+                        {group.models.map((entry) => (
+                          <ModelSelectorItem
+                            data-checked={model === entry.id || undefined}
+                            key={entry.id}
+                            onSelect={() => handleModelSelect(entry.id)}
+                            value={`${entry.name} ${entry.id}`}
+                          >
+                            <ModelSelectorLogo
+                              provider={providerLogoSlug(entry.id)}
+                            />
+                            <ModelSelectorName>{entry.name}</ModelSelectorName>
+                          </ModelSelectorItem>
+                        ))}
+                      </ModelSelectorGroup>
+                    ))}
+                  </ModelSelectorList>
+                </ModelSelectorContent>
+              </ModelSelector>
             )}
 
             <Button
