@@ -38,11 +38,12 @@ def build_agent() -> Agent[CFODeps, str]:
     Returns:
         Configured agent ready for web or CLI use.
     """
+    model = build_model()
     agent = Agent(
-        build_model(),
+        model,
         deps_type=CFODeps,
         instructions=CFO_INSTRUCTIONS,
-        model_settings=build_model_settings(),
+        model_settings=build_model_settings(model_id=model.model_id),
         retries={"output": 3},
         tools=[
             list_accounts,

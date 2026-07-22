@@ -97,6 +97,7 @@ async def post_chat(
     request_model_settings = build_model_settings(
         reasoning_effort=resolve_reasoning_effort(chat_options),
         session_id=conversation_id,
+        model_id=persisted_model_id,
     )
 
     async def on_complete(result: AgentRunResult) -> None:

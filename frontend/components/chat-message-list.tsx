@@ -1,6 +1,11 @@
 "use client";
 
-import { Message, MessageContent } from "@/components/ai-elements/message";
+import {
+  Message,
+  MessageAction,
+  MessageActions,
+  MessageContent,
+} from "@/components/ai-elements/message";
 import { MessageChartSupplements } from "@/components/finance/message-chart-supplements";
 import {
   MessagePart,
@@ -24,7 +29,14 @@ import type {
 import {
   ConversationEmptyState,
 } from "@/components/ai-elements/conversation";
-import { WalletIcon } from "lucide-react";
+import { CopyIcon, WalletIcon } from "lucide-react";
+
+function userPromptText(message: UIMessage): string {
+  return message.parts
+    .filter((part): part is { type: "text"; text: string } => part.type === "text")
+    .map((part) => part.text)
+    .join("\n");
+}
 
 function messagePartKey(
   message: UIMessage,
@@ -130,6 +142,22 @@ export function ChatMessageList({
                 <MessageChartSupplements message={message} />
               ) : null}
             </MessageContent>
+            {message.role === "user" && userPromptText(message) ? (
+              <MessageActions className="-mt-1 opacity-70">
+                <MessageAction
+                  className="cursor-pointer"
+                  label="Copy prompt"
+                  onClick={() => {
+                    // User feedback for clipboard failures is deferred.
+                    navigator.clipboard
+                      .writeText(userPromptText(message))
+                      .catch(() => {});
+                  }}
+                >
+                  <CopyIcon className="size-3.5" />
+                </MessageAction>
+              </MessageActions>
+            ) : null}
           </Message>
         );
         })

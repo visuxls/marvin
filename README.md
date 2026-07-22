@@ -8,7 +8,7 @@ Marvin is a a local first, personal CFO assistant you chat with. It reads your a
 
 Marvin runs on your machine. CSVs, SQLite, your profile, and chat history all live in `data/`. There's no hosted backend and no analytics.
 
-Chat goes out to [OpenRouter](https://openrouter.ai/) (or whichever model provider you configure). Ticker prices come from Yahoo Finance. Your imports and database don't leave the machine.
+Chat goes out to [OpenRouter](https://openrouter.ai/) (or whichever model provider you configure). DeepSeek models are locked to DeepSeek's own inference endpoints because their cache pricing is much cheaper than third-party hosts. Ticker prices come from Yahoo Finance. Your imports and database don't leave the machine.
 
 ## No Plaid
 

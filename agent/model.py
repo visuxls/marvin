@@ -107,21 +107,51 @@ def build_model(settings: Settings | None = None) -> OpenRouterModel:
     )
 
 
+def _openrouter_model_slug(model_id: str) -> str:
+    """
+    Normalize a UI or OpenRouter model id to ``org/model`` form.
+
+    Args:
+        model_id: Model id, optionally prefixed with ``openrouter:``.
+
+    Returns:
+        Bare OpenRouter model slug.
+    """
+    return model_id.removeprefix("openrouter:")
+
+
+def is_deepseek_model(model_id: str) -> bool:
+    """
+    Return whether ``model_id`` is a DeepSeek-hosted OpenRouter model.
+
+    Args:
+        model_id: UI or OpenRouter model id.
+
+    Returns:
+        True when the model org slug is ``deepseek``.
+    """
+    return _openrouter_model_slug(model_id).startswith("deepseek/")
+
+
 def build_model_settings(
     *,
     reasoning_effort: ReasoningSelection | None = None,
     session_id: str | None = None,
+    model_id: str | None = None,
 ) -> OpenRouterModelSettings:
     """
     Create OpenRouter model settings for an agent run.
 
-    Omits explicit provider routing so OpenRouter can pick a cheap endpoint and
-    sticky-route follow-ups. When ``session_id`` is set (typically the chat
-    conversation id), sticky routing activates on the first successful request.
+    DeepSeek models are locked to DeepSeek's own inference endpoints. Other
+    models omit explicit provider routing so OpenRouter can pick a cheap
+    endpoint and sticky-route follow-ups. When ``session_id`` is set (typically
+    the chat conversation id), sticky routing activates on the first successful
+    request.
 
     Args:
         reasoning_effort: Optional per-request reasoning effort from the UI.
         session_id: Optional OpenRouter session id for provider sticky routing.
+        model_id: Optional selected model id used for provider routing rules.
 
     Returns:
         OpenRouter model settings for agent runs.
@@ -130,6 +160,11 @@ def build_model_settings(
     model_settings: OpenRouterModelSettings = {}
     if session_id:
         model_settings["extra_body"] = {"session_id": session_id}
+    if model_id and is_deepseek_model(model_id):
+        model_settings["openrouter_provider"] = {
+            "only": ["deepseek"],
+            "allow_fallbacks": False,
+        }
     if selected_effort != "off":
         model_settings["openrouter_reasoning"] = {
             "effort": selected_effort,

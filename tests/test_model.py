@@ -2,6 +2,7 @@ from agent.model import (
     build_available_models,
     build_model,
     build_model_settings,
+    is_deepseek_model,
     parse_model_entry,
 )
 from config import Settings
@@ -13,6 +14,13 @@ def test_parse_model_entry_with_label():
 
 def test_parse_model_entry_without_label():
     assert parse_model_entry("z-ai/glm-5.2") == ("z-ai/glm-5.2", "z-ai/glm-5.2")
+
+
+def test_is_deepseek_model():
+    assert is_deepseek_model("deepseek/deepseek-v4-pro")
+    assert is_deepseek_model("openrouter:deepseek/deepseek-chat")
+    assert not is_deepseek_model("z-ai/glm-5.2")
+    assert not is_deepseek_model("openrouter:anthropic/claude-opus-4.8")
 
 
 def test_build_available_models_defaults_to_single_model(test_settings: Settings):
@@ -53,6 +61,19 @@ def test_build_model_settings():
 def test_build_model_settings_with_session_id():
     settings = build_model_settings(session_id="conv-1")
     assert settings["extra_body"] == {"session_id": "conv-1"}
+    assert "openrouter_provider" not in settings
+
+
+def test_build_model_settings_locks_deepseek_provider():
+    settings = build_model_settings(model_id="openrouter:deepseek/deepseek-v4-pro")
+    assert settings["openrouter_provider"] == {
+        "only": ["deepseek"],
+        "allow_fallbacks": False,
+    }
+
+
+def test_build_model_settings_does_not_lock_non_deepseek():
+    settings = build_model_settings(model_id="openrouter:z-ai/glm-5.2")
     assert "openrouter_provider" not in settings
 
 
