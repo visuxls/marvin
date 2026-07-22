@@ -70,6 +70,40 @@ describe("useMarvinConfig", () => {
     expect(result.current.model).toBe("model-b");
   });
 
+  it("does not overwrite a model already set before configure resolves", async () => {
+    let resolveConfigure: (value: unknown) => void = () => {};
+    vi.mocked(fetchConfigure).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveConfigure = resolve;
+        })
+    );
+
+    const { result } = renderHook(() => useMarvinConfig());
+
+    act(() => {
+      result.current.setModel("model-b");
+    });
+
+    await act(async () => {
+      resolveConfigure({
+        models: [
+          { id: "model-a", name: "Model A", builtinTools: [] },
+          { id: "model-b", name: "Model B", builtinTools: [] },
+        ],
+        builtinTools: [],
+        reasoningEfforts: [{ id: "off", label: "Off" }],
+        defaultReasoningEffort: "off",
+      });
+    });
+
+    await waitFor(() => {
+      expect(result.current.config).not.toBeNull();
+    });
+
+    expect(result.current.model).toBe("model-b");
+  });
+
   it("allows changing the selected reasoning effort", async () => {
     vi.mocked(fetchConfigure).mockResolvedValue({
       models: [{ id: "model-a", name: "Model A", builtinTools: [] }],

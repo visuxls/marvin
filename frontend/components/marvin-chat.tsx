@@ -20,11 +20,12 @@ import { useMarvinChat } from "@/hooks/use-marvin-chat";
 import { useMarvinConfig } from "@/hooks/use-marvin-config";
 import { useSidebarCollapsed } from "@/hooks/use-sidebar-collapsed";
 import { CHAT_COLUMN } from "@/lib/constants";
+import { conversationModelToRestore } from "@/lib/conversations";
 import { pruneOrphanedAssistantPrefixes } from "@/lib/message-parts";
 import { cn } from "@/lib/utils";
 import { PRESET_QUESTIONS } from "@/lib/chat-suggestions";
 import { nanoid } from "nanoid";
-import { FormEvent, useCallback, useState } from "react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 
 interface MarvinChatProps {
   conversationId: string;
@@ -38,9 +39,21 @@ export function MarvinChat({
   const [input, setInput] = useState("");
   const { config, model, setModel, reasoningEffort, setReasoningEffort } =
     useMarvinConfig();
-  const { refresh, setSearchQuery } = useConversations();
+  const { refresh, setSearchQuery, entries } = useConversations();
   const { collapsed: sidebarCollapsed, setCollapsed: setSidebarCollapsed } =
     useSidebarCollapsed();
+
+  useEffect(() => {
+    const storedModel = conversationModelToRestore(
+      entries,
+      conversationId,
+      (config?.models ?? []).map((item) => item.id)
+    );
+    if (!storedModel) {
+      return;
+    }
+    setModel(storedModel);
+  }, [conversationId, entries, config, setModel]);
 
   const {
     messages,

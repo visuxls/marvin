@@ -53,6 +53,7 @@ class ConversationSummaryResponse(BaseModel):
     title: str
     created_at: int
     pinned: bool
+    model: str | None = None
 
 
 class ConversationMessagesResponse(BaseModel):

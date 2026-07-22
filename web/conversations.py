@@ -69,6 +69,7 @@ def conversation_summary_response(summary: ConversationSummary) -> ConversationS
         title=summary.title,
         created_at=_iso_to_epoch_ms(summary.created_at),
         pinned=summary.pinned,
+        model=summary.model_id,
     )
 
 

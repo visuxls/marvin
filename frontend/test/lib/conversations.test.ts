@@ -1,4 +1,5 @@
 import {
+  conversationModelToRestore,
   deleteConversation,
   fetchConversationMessages,
   filterConversations,
@@ -13,6 +14,44 @@ const entries: ConversationEntry[] = [
   { id: "2", title: "Holdings review", createdAt: 1_700_000_100_000, pinned: true },
   { id: "3", title: "Tax planning", createdAt: 1_700_000_200_000 },
 ];
+
+describe("conversationModelToRestore", () => {
+  const available = ["openrouter:z-ai/glm-5.2", "openrouter:anthropic/claude-opus-4.8"];
+
+  it("returns the stored model when it is still available", () => {
+    const withModel: ConversationEntry[] = [
+      {
+        id: "1",
+        title: "Opus chat",
+        createdAt: 1,
+        model: "openrouter:anthropic/claude-opus-4.8",
+      },
+    ];
+    expect(conversationModelToRestore(withModel, "1", available)).toBe(
+      "openrouter:anthropic/claude-opus-4.8"
+    );
+  });
+
+  it("returns undefined when the conversation has no stored model", () => {
+    expect(conversationModelToRestore(entries, "1", available)).toBeUndefined();
+  });
+
+  it("returns undefined when the stored model is no longer available", () => {
+    const withModel: ConversationEntry[] = [
+      {
+        id: "1",
+        title: "Old chat",
+        createdAt: 1,
+        model: "openrouter:retired-model",
+      },
+    ];
+    expect(conversationModelToRestore(withModel, "1", available)).toBeUndefined();
+  });
+
+  it("returns undefined when the conversation id is not in the list", () => {
+    expect(conversationModelToRestore(entries, "missing", available)).toBeUndefined();
+  });
+});
 
 describe("filterConversations", () => {
   it("returns all entries when query is empty", () => {
@@ -32,7 +71,9 @@ describe("filterConversations", () => {
 
 describe("listConversations", () => {
   it("returns parsed conversations on success", async () => {
-    const payload = [{ id: "a", title: "Chat", createdAt: 1 }];
+    const payload = [
+      { id: "a", title: "Chat", createdAt: 1, model: "openrouter:z-ai/glm-5.2" },
+    ];
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({

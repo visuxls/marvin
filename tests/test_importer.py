@@ -53,10 +53,18 @@ def test_import_skips_unknown_account(tmp_path: Path, test_settings: Settings):
         "Account ID,Date,Balance\n99,2025-01-01,100\n",
         encoding="utf-8",
     )
+    holdings = tmp_path / "imports" / "holdings.csv"
+    holdings.write_text(
+        "Account ID,Symbol,Quantity,Cost Basis\n99,VOO,10,400.00\n",
+        encoding="utf-8",
+    )
     results = import_all(settings=test_settings)
     balance_result = results[1]
     assert balance_result.skipped == 1
     assert any("unknown Account ID" in error for error in balance_result.errors)
+    holdings_result = results[2]
+    assert holdings_result.skipped == 1
+    assert any("unknown Account ID" in error for error in holdings_result.errors)
 
 
 def test_log_import_results(caplog: pytest.LogCaptureFixture):

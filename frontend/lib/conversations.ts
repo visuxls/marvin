@@ -7,6 +7,23 @@ export interface ConversationEntry {
   title: string;
   createdAt: number;
   pinned?: boolean;
+  model?: string | null;
+}
+
+/** Resolve a stored conversation model that is still available in configure. */
+export function conversationModelToRestore(
+  entries: ConversationEntry[],
+  conversationId: string,
+  availableModelIds: readonly string[]
+): string | undefined {
+  const entry = entries.find((item) => item.id === conversationId);
+  if (!entry?.model) {
+    return undefined;
+  }
+  if (!availableModelIds.includes(entry.model)) {
+    return undefined;
+  }
+  return entry.model;
 }
 
 export function filterConversations(

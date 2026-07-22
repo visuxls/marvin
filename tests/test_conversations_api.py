@@ -13,12 +13,18 @@ def test_list_conversations_route(api_app):
 
 
 def test_conversation_routes_round_trip(api_app, db_path):
-    save_conversation_messages("chat-a", [model_request("alpha")], db_path=db_path)
+    save_conversation_messages(
+        "chat-a",
+        [model_request("alpha")],
+        db_path=db_path,
+        model_id="anthropic/claude-opus-4.8",
+    )
     client = TestClient(api_app)
 
     listed = client.get("/api/conversations")
     assert listed.status_code == 200
     assert listed.json()[0]["title"] == "alpha"
+    assert listed.json()[0]["model"] == "anthropic/claude-opus-4.8"
 
     messages = client.get("/api/conversations/chat-a/messages")
     assert messages.status_code == 200
@@ -33,6 +39,14 @@ def test_conversation_routes_round_trip(api_app, db_path):
     deleted = client.delete("/api/conversations/chat-a")
     assert deleted.status_code == 200
     assert client.get("/api/conversations").json() == []
+
+
+def test_list_conversations_includes_null_model_for_legacy_rows(api_app, db_path):
+    save_conversation_messages("chat-a", [model_request("alpha")], db_path=db_path)
+    client = TestClient(api_app)
+    listed = client.get("/api/conversations")
+    assert listed.status_code == 200
+    assert listed.json()[0]["model"] is None
 
 
 def test_patch_conversation_invalid_json(api_app):

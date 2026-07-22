@@ -6,6 +6,7 @@ from pydantic_ai.messages import (
     ModelMessage,
     ModelMessagesTypeAdapter,
     ModelRequest,
+    ModelResponse,
     SystemPromptPart,
     UserPromptPart,
 )
@@ -28,6 +29,7 @@ class ConversationSummary:
     title: str
     created_at: str
     pinned: bool
+    model_id: str | None = None
 
 
 def truncate_title(text: str, *, max_length: int = TITLE_MAX_LENGTH) -> str:
@@ -118,6 +120,40 @@ def resolve_conversation_title(
     return title_from_messages(messages) or (fallback_title or "").strip() or ""
 
 
+def client_model_id_from_response_name(model_name: str) -> str:
+    """
+    Map a stored ``ModelResponse.model_name`` to the configure/UI model id.
+
+    OpenRouter responses store a bare id (``provider/model``); the chat UI and
+    configure endpoint use the ``openrouter:``-prefixed form.
+
+    Args:
+        model_name: Model name from a persisted assistant response.
+
+    Returns:
+        Model id suitable for the frontend model picker.
+    """
+    if model_name.startswith("openrouter:"):
+        return model_name
+    return f"openrouter:{model_name}"
+
+
+def model_id_from_messages(messages: Sequence[ModelMessage]) -> str | None:
+    """
+    Derive the last-used model id from persisted assistant responses.
+
+    Args:
+        messages: Stored model messages for a conversation.
+
+    Returns:
+        Client model id from the most recent response, or None when absent.
+    """
+    for message in reversed(messages):
+        if isinstance(message, ModelResponse) and message.model_name:
+            return client_model_id_from_response_name(message.model_name)
+    return None
+
+
 def list_conversation_summaries(
     *,
     db_path: Path,
@@ -134,7 +170,7 @@ def list_conversation_summaries(
     with db_connection(db_path) as connection:
         rows = connection.execute(
             """
-                        SELECT conversation_id, title, pinned, created_at, messages_json
+                        SELECT conversation_id, title, pinned, created_at, model_id, messages_json
                         FROM conversations
                         ORDER BY pinned DESC, created_at DESC
             """
@@ -143,9 +179,14 @@ def list_conversation_summaries(
         summaries: list[ConversationSummary] = []
         for row in rows:
             title = (row["title"] or "").strip()
-            if not title:
+            model_id = row["model_id"]
+            messages: list[ModelMessage] | None = None
+            if not title or not model_id:
                 messages = ModelMessagesTypeAdapter.validate_json(row["messages_json"])
-                title = resolve_conversation_title(None, messages) or "New chat"
+            if not title:
+                title = resolve_conversation_title(None, messages or []) or "New chat"
+            if not model_id:
+                model_id = model_id_from_messages(messages or [])
 
             summaries.append(
                 ConversationSummary(
@@ -153,6 +194,7 @@ def list_conversation_summaries(
                     title=title,
                     created_at=row["created_at"],
                     pinned=bool(row["pinned"]),
+                    model_id=model_id,
                 )
             )
 
@@ -197,6 +239,7 @@ def save_conversation_messages(
     *,
     db_path: Path,
     fallback_title: str | None = None,
+    model_id: str | None = None,
 ) -> None:
     """
     Persist model messages for a conversation.
@@ -206,6 +249,8 @@ def save_conversation_messages(
         messages: Full model message history for the conversation.
         db_path: Path to the SQLite database file.
         fallback_title: Optional title derived from the client request.
+        model_id: Optional client model id last used for this conversation.
+            When omitted on update, the existing stored model id is preserved.
     """
     messages = strip_system_messages(messages)
     if len(messages) > MAX_STORED_MESSAGES:
@@ -217,7 +262,7 @@ def save_conversation_messages(
     with db_connection(db_path) as connection:
         existing = connection.execute(
             """
-                        SELECT title, created_at
+                        SELECT title, created_at, model_id
                         FROM conversations
                         WHERE conversation_id = ?
             """,
@@ -229,6 +274,9 @@ def save_conversation_messages(
             messages,
             fallback_title=fallback_title,
         )
+        resolved_model_id = (
+            model_id if model_id is not None else (existing["model_id"] if existing else None)
+        )
 
         if existing is None:
             connection.execute(
@@ -238,12 +286,13 @@ def save_conversation_messages(
                                     messages_json,
                                     title,
                                     pinned,
+                                    model_id,
                                     created_at,
                                     updated_at
                                 )
-                                VALUES (?, ?, ?, 0, ?, ?)
+                                VALUES (?, ?, ?, 0, ?, ?, ?)
                 """,
-                (conversation_id, payload, title, timestamp, timestamp),
+                (conversation_id, payload, title, resolved_model_id, timestamp, timestamp),
             )
         else:
             connection.execute(
@@ -251,10 +300,11 @@ def save_conversation_messages(
                                 UPDATE conversations
                                 SET messages_json = ?,
                                     title = ?,
+                                    model_id = ?,
                                     updated_at = ?
                                 WHERE conversation_id = ?
                 """,
-                (payload, title, timestamp, conversation_id),
+                (payload, title, resolved_model_id, timestamp, conversation_id),
             )
         connection.commit()
 

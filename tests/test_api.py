@@ -213,6 +213,119 @@ def test_post_chat_dispatches_and_persists(test_settings: Settings, monkeypatch)
     assert len(loaded) == 2
 
 
+def test_post_chat_persists_request_model(test_settings: Settings, monkeypatch):
+    from pydantic_ai.messages import ModelRequest, UserPromptPart
+
+    from storage.conversation_memory import list_conversation_summaries
+
+    monkeypatch.setattr("web.dependencies.get_app_settings", lambda: test_settings)
+    test_settings.OPENROUTER_MODELS = [
+        "GLM:z-ai/glm-5.2",
+        "Opus:anthropic/claude-opus-4.8",
+    ]
+    agent = Agent(TestModel(), deps_type=CFODeps)
+    app = _build_api_app(
+        agent,
+        models=build_available_models(test_settings),
+        deps=CFODeps(
+            db_path=test_settings.DB_PATH,
+            profile_path=test_settings.PROFILE_PATH,
+        ),
+    )
+    selected_model_id = "openrouter:anthropic/claude-opus-4.8"
+
+    async def fake_dispatch(*args, **kwargs):
+        class Result:
+            def all_messages(self):
+                return [ModelRequest(parts=[UserPromptPart(content="hello")])]
+
+        await kwargs["on_complete"](Result())
+        return JSONResponse({"ok": True})
+
+    adapter = MagicMock()
+    adapter.run_input = MagicMock(__pydantic_extra__={"model": selected_model_id})
+    adapter.dispatch_request = fake_dispatch
+
+    with patch(
+        "web.memory.routes.chat.VercelAIAdapter.from_request",
+        new=AsyncMock(return_value=adapter),
+    ):
+        client = TestClient(app)
+        response = client.post(
+            "/api/chat",
+            json={
+                "id": "conv-model",
+                "messages": [
+                    {
+                        "id": "1",
+                        "role": "user",
+                        "parts": [{"type": "text", "text": "hello"}],
+                    }
+                ],
+            },
+        )
+
+    assert response.status_code == 200
+    summary = list_conversation_summaries(db_path=test_settings.DB_PATH)[0]
+    assert summary.model_id == selected_model_id
+
+
+def test_post_chat_persists_default_model_when_omitted(test_settings: Settings, monkeypatch):
+    from pydantic_ai.messages import ModelRequest, UserPromptPart
+
+    from storage.conversation_memory import list_conversation_summaries
+
+    monkeypatch.setattr("web.dependencies.get_app_settings", lambda: test_settings)
+    test_settings.OPENROUTER_MODELS = [
+        "GLM:z-ai/glm-5.2",
+        "Opus:anthropic/claude-opus-4.8",
+    ]
+    agent = Agent(TestModel(), deps_type=CFODeps)
+    app = _build_api_app(
+        agent,
+        models=build_available_models(test_settings),
+        deps=CFODeps(
+            db_path=test_settings.DB_PATH,
+            profile_path=test_settings.PROFILE_PATH,
+        ),
+    )
+
+    async def fake_dispatch(*args, **kwargs):
+        class Result:
+            def all_messages(self):
+                return [ModelRequest(parts=[UserPromptPart(content="hello")])]
+
+        await kwargs["on_complete"](Result())
+        return JSONResponse({"ok": True})
+
+    adapter = MagicMock()
+    adapter.run_input = MagicMock(__pydantic_extra__={})
+    adapter.dispatch_request = fake_dispatch
+
+    with patch(
+        "web.memory.routes.chat.VercelAIAdapter.from_request",
+        new=AsyncMock(return_value=adapter),
+    ):
+        client = TestClient(app)
+        response = client.post(
+            "/api/chat",
+            json={
+                "id": "conv-default-model",
+                "messages": [
+                    {
+                        "id": "1",
+                        "role": "user",
+                        "parts": [{"type": "text", "text": "hello"}],
+                    }
+                ],
+            },
+        )
+
+    assert response.status_code == 200
+    summary = list_conversation_summaries(db_path=test_settings.DB_PATH)[0]
+    assert summary.model_id == "openrouter:z-ai/glm-5.2"
+
+
 def test_post_chat_uses_client_history_when_longer(test_settings: Settings, monkeypatch):
     monkeypatch.setattr("web.dependencies.get_app_settings", lambda: test_settings)
     agent = Agent(TestModel(), deps_type=CFODeps)

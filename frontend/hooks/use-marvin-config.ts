@@ -33,7 +33,8 @@ export function useMarvinConfig() {
       }
       setConfig(data);
       if (data.models.length > 0) {
-        setModel(data.models[0].id);
+        // Keep a model already restored from the active conversation.
+        setModel((current) => current || data.models[0].id);
       }
       const effortIds = (data.reasoningEfforts ?? []).map((entry) => entry.id);
       setReasoningEffort(

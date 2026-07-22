@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS conversations (
     messages_json TEXT NOT NULL,
     title TEXT NOT NULL DEFAULT '',
     pinned INTEGER NOT NULL DEFAULT 0,
+    model_id TEXT,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL
 );
@@ -83,6 +84,8 @@ def _migrate_conversations_schema(connection: sqlite3.Connection) -> None:
         connection.execute(
             "UPDATE conversations SET created_at = updated_at WHERE created_at IS NULL"
         )
+    if "model_id" not in columns:
+        connection.execute("ALTER TABLE conversations ADD COLUMN model_id TEXT")
 
 
 def connect(db_path: Path | None = None) -> sqlite3.Connection:

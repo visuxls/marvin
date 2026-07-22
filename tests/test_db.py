@@ -54,6 +54,7 @@ def test_connect_migrates_legacy_conversations_table(tmp_path: Path):
         assert "title" in columns
         assert "pinned" in columns
         assert "created_at" in columns
+        assert "model_id" in columns
     finally:
         connection.close()
 

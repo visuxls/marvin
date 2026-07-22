@@ -201,12 +201,92 @@ def test_list_conversation_summaries(db_path):
 
 
 def test_conversation_summary_response(db_path):
-    save_conversation_messages("chat-a", [model_request("alpha")], db_path=db_path)
+    save_conversation_messages(
+        "chat-a",
+        [model_request("alpha")],
+        db_path=db_path,
+        model_id="anthropic/claude-opus-4.8",
+    )
     summary = list_conversation_summaries(db_path=db_path)[0]
     payload = conversation_summary_response(summary)
     assert payload.id == "chat-a"
     assert payload.title == "alpha"
+    assert payload.model == "anthropic/claude-opus-4.8"
     assert isinstance(payload.created_at, int)
+
+
+def test_save_conversation_messages_stores_model_id(db_path):
+    save_conversation_messages(
+        "chat-a",
+        [model_request("alpha")],
+        db_path=db_path,
+        model_id="z-ai/glm-5.2",
+    )
+    summary = list_conversation_summaries(db_path=db_path)[0]
+    assert summary.model_id == "z-ai/glm-5.2"
+
+
+def test_save_conversation_messages_preserves_model_id_when_omitted(db_path):
+    save_conversation_messages(
+        "chat-a",
+        [model_request("alpha")],
+        db_path=db_path,
+        model_id="anthropic/claude-opus-4.8",
+    )
+    save_conversation_messages("chat-a", [model_request("beta")], db_path=db_path)
+    summary = list_conversation_summaries(db_path=db_path)[0]
+    assert summary.model_id == "anthropic/claude-opus-4.8"
+
+
+def test_save_conversation_messages_updates_model_id(db_path):
+    save_conversation_messages(
+        "chat-a",
+        [model_request("alpha")],
+        db_path=db_path,
+        model_id="z-ai/glm-5.2",
+    )
+    save_conversation_messages(
+        "chat-a",
+        [model_request("beta")],
+        db_path=db_path,
+        model_id="anthropic/claude-opus-4.8",
+    )
+    summary = list_conversation_summaries(db_path=db_path)[0]
+    assert summary.model_id == "anthropic/claude-opus-4.8"
+
+
+def test_client_model_id_from_response_name_prefixes_openrouter():
+    from storage.conversation_memory import client_model_id_from_response_name
+
+    assert (
+        client_model_id_from_response_name("deepseek/deepseek-v4-pro")
+        == "openrouter:deepseek/deepseek-v4-pro"
+    )
+    assert (
+        client_model_id_from_response_name("openrouter:z-ai/glm-5.2")
+        == "openrouter:z-ai/glm-5.2"
+    )
+
+
+def test_list_conversation_summaries_derives_model_from_messages(db_path):
+    from storage.conversation_memory import save_conversation_messages
+
+    messages = [
+        model_request("hello"),
+        ModelResponse(
+            parts=[TextPart(content="hi")],
+            model_name="anthropic/claude-opus-4.8",
+        ),
+    ]
+    save_conversation_messages("chat-a", messages, db_path=db_path)
+
+    connection = sqlite3.connect(db_path)
+    connection.execute("UPDATE conversations SET model_id = NULL WHERE conversation_id = 'chat-a'")
+    connection.commit()
+    connection.close()
+
+    summary = list_conversation_summaries(db_path=db_path)[0]
+    assert summary.model_id == "openrouter:anthropic/claude-opus-4.8"
 
 
 def test_update_conversation_metadata(db_path):

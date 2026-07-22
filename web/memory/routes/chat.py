@@ -62,15 +62,6 @@ async def post_chat(
     )
     request = request_with_payload(request, payload)
 
-    async def on_complete(result: AgentRunResult) -> None:
-        await asyncio.to_thread(
-            save_conversation_messages,
-            conversation_id,
-            result.all_messages(),
-            db_path=settings.DB_PATH,
-            fallback_title=title_from_ui_messages(client_messages),
-        )
-
     try:
         adapter = await VercelAIAdapter.from_request(
             request,
@@ -97,6 +88,8 @@ async def post_chat(
         raise HTTPException(status_code=422, detail=exc.errors()) from exc
 
     model_ref = runtime.model_id_to_ref.get(extra_data.model) if extra_data.model else None
+    default_model_id = runtime.model_infos[0].id if runtime.model_infos else None
+    persisted_model_id = extra_data.model or default_model_id
     request_native_tools = [
         tool for tool in runtime.ui_native_tools if tool.unique_id in extra_data.builtin_tools
     ]
@@ -105,6 +98,16 @@ async def post_chat(
         reasoning_effort=resolve_reasoning_effort(chat_options),
         session_id=conversation_id,
     )
+
+    async def on_complete(result: AgentRunResult) -> None:
+        await asyncio.to_thread(
+            save_conversation_messages,
+            conversation_id,
+            result.all_messages(),
+            db_path=settings.DB_PATH,
+            fallback_title=title_from_ui_messages(client_messages),
+            model_id=persisted_model_id,
+        )
 
     return await adapter.dispatch_request(
         request,
