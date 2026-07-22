@@ -11,4 +11,4 @@ export const REASONING_EFFORT_KEY = "marvin:reasoning-effort";
 export const SERVER_CONVERSATION_PLACEHOLDER = "default";
 
 /** Max width class shared by chat column sections. */
-export const CHAT_COLUMN = "mx-auto w-full max-w-3xl px-4";
+export const CHAT_COLUMN = "mx-auto w-full max-w-3xl px-4 sm:px-6";

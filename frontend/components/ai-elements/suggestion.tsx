@@ -1,27 +1,33 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  ScrollArea,
-  ScrollBar,
-} from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import type { ComponentProps } from "react";
 import { useCallback } from "react";
 
-export type SuggestionsProps = ComponentProps<typeof ScrollArea>;
+export type SuggestionsProps = ComponentProps<"div">;
 
+/**
+ * Horizontally scrollable suggestion chips.
+ *
+ * Uses native overflow scrolling instead of Base UI ScrollArea so taps on
+ * chips register reliably on mobile (ScrollArea's focusable viewport can
+ * swallow click/touch on iOS).
+ */
 export const Suggestions = ({
   className,
   children,
   ...props
 }: SuggestionsProps) => (
-  <ScrollArea className="w-full overflow-x-auto whitespace-nowrap" {...props}>
-    <div className={cn("flex w-max flex-nowrap items-center gap-2", className)}>
-      {children}
-    </div>
-    <ScrollBar className="hidden" orientation="horizontal" />
-  </ScrollArea>
+  <div
+    className={cn(
+      "flex w-full gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+      className
+    )}
+    {...props}
+  >
+    {children}
+  </div>
 );
 
 export type SuggestionProps = Omit<ComponentProps<typeof Button>, "onClick"> & {
@@ -44,7 +50,7 @@ export const Suggestion = ({
 
   return (
     <Button
-      className={cn("cursor-pointer rounded-full px-4", className)}
+      className={cn("shrink-0 cursor-pointer rounded-full px-4", className)}
       onClick={handleClick}
       size={size}
       type="button"

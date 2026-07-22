@@ -10,6 +10,18 @@ UI_URL="http://localhost:3000"
 VERSION="$(sed -n 's/^version = "\([^"]*\)"/\1/p' pyproject.toml | head -1)"
 VERSION="${VERSION:-0.1.0}"
 
+lan_ip() {
+  if command -v ipconfig >/dev/null 2>&1; then
+    ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null || true
+  fi
+}
+
+LAN_IP="$(lan_ip)"
+LAN_UI_URL=""
+if [[ -n "${LAN_IP}" ]]; then
+  LAN_UI_URL="http://${LAN_IP}:3000"
+fi
+
 trap 'kill 0' EXIT INT TERM
 
 print_banner() {
@@ -29,7 +41,14 @@ print_banner() {
     " ${cyan}▐  ▝▀▘  ▌${reset}" \
     "" \
     "  ${cyan}●${reset} ${dim}API${reset}  ${bold}http://${API_HOST}:${API_PORT}${reset}" \
-    "  ${cyan}●${reset} ${dim}UI${reset}   ${bold}${UI_URL}${reset}  ${dim}· opens when ready${reset}" \
+    "  ${cyan}●${reset} ${dim}UI${reset}   ${bold}${UI_URL}${reset}  ${dim}· opens when ready${reset}"
+
+  if [[ -n "${LAN_UI_URL}" ]]; then
+    printf '%s\n' \
+      "  ${cyan}●${reset} ${dim}LAN${reset}  ${bold}${LAN_UI_URL}${reset}  ${dim}· phone / other devices${reset}"
+  fi
+
+  printf '%s\n' \
     "" \
     "  ${dim}Press Ctrl+C to stop both${reset}" \
     ""

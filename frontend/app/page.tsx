@@ -17,7 +17,7 @@ function MarvinApp() {
 
 export default function Home() {
   return (
-    <div className="flex h-svh flex-col bg-background">
+    <div className="flex h-dvh max-h-dvh flex-col overflow-hidden bg-background">
       <ConversationsProvider>
         <MarvinApp />
       </ConversationsProvider>

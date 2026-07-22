@@ -146,7 +146,7 @@ export function MarvinChat({
   }, [clearError, messages, regenerate]);
 
   return (
-    <div className="flex h-full min-h-0 flex-1">
+    <div className="flex h-full min-h-0 flex-1 overflow-hidden">
       <aside
         className={cn(
           "fixed inset-y-0 left-0 z-10 hidden flex-col border-r bg-background transition-[width] duration-200 md:flex",
@@ -175,11 +175,11 @@ export function MarvinChat({
 
       <div
         className={cn(
-          "flex min-h-0 min-w-0 flex-1 flex-col transition-[padding] duration-200",
+          "flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden transition-[padding] duration-200",
           sidebarCollapsed ? "md:pl-14" : "md:pl-72"
         )}
       >
-        <div className="flex shrink-0 items-center gap-2 border-b px-4 py-3 md:hidden">
+        <div className="relative z-20 flex shrink-0 items-center gap-2 border-b bg-background px-3 py-2 md:hidden">
           <MobileConversationMenu
             activeId={conversationId}
             onNew={handleNewChat}
@@ -188,7 +188,7 @@ export function MarvinChat({
           <span className="font-medium text-sm">Marvin</span>
         </div>
 
-        <Conversation className="min-h-0 flex-1">
+        <Conversation className="min-h-0 flex-1 overflow-hidden">
           <ConversationContent className="gap-0 p-0">
             <ChatMessageList
               error={error}
@@ -203,7 +203,7 @@ export function MarvinChat({
           <ConversationScrollButton />
         </Conversation>
 
-        <div className="shrink-0 bg-gradient-to-t from-background via-background to-transparent px-4 pb-4 pt-2">
+        <div className="relative z-20 shrink-0 bg-gradient-to-t from-background via-background to-transparent pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 sm:pb-4">
           <div className={CHAT_COLUMN}>
             {messages.length === 0 && !isLoadingMessages && (
               <ChatPresetQuestions

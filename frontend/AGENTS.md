@@ -111,9 +111,9 @@ Keep changes scoped to the right layer. Prefer extending existing hooks and `lib
 - Copy `.env.local.example` to `.env.local` before running locally.
 - **`MARVIN_API_URL`** — server-side proxy target (default `http://127.0.0.1:7932`). Used only in `app/api/[...path]/route.ts`.
 - **`NEXT_PUBLIC_MARVIN_API_URL`** — optional; when set, `lib/marvin-api.ts` calls the backend directly from the browser (skip proxy). Leave unset in normal dev.
+- **`ALLOWED_DEV_ORIGINS`** — optional comma-separated hostnames for Next.js `allowedDevOrigins`. When unset, `next.config.ts` auto-allows local LAN IPv4 addresses so phones can open the UI via your machine's IP. Required for clicks/hydration when not using `localhost`.
 - When `API_BASE` is empty, `lib/marvin-api.ts` uses same-origin `/api/*` (proxied).
 - The Marvin backend must be running (`uvicorn app:app --host 127.0.0.1 --port 7932`) and must allow CORS from `http://localhost:3000` if using `NEXT_PUBLIC_MARVIN_API_URL`.
-
 ### API proxy
 
 - `app/api/[...path]/route.ts` forwards GET/POST/PATCH/DELETE to `{MARVIN_API_URL}/api/{path}`.

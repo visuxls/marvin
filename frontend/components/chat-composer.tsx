@@ -31,7 +31,7 @@ import { useMemo, useState, type FormEvent, type KeyboardEvent } from "react";
 
 /** Shared pill chrome for model + reasoning composer controls. */
 const COMPOSER_CONTROL_TRIGGER_CLASS =
-  "h-8 shrink-0 gap-1.5 rounded-full border-0 bg-muted px-3 text-muted-foreground text-xs shadow-none hover:bg-muted data-popup-open:bg-muted aria-expanded:bg-muted";
+  "h-8 max-w-[9.5rem] shrink-0 gap-1.5 rounded-full border-0 bg-muted px-2.5 text-muted-foreground text-xs shadow-none hover:bg-muted sm:max-w-[11rem] sm:px-3 data-popup-open:bg-muted aria-expanded:bg-muted";
 
 interface ChatComposerProps {
   input: string;
@@ -88,7 +88,7 @@ export function ChatComposer({
     <form className="w-full" onSubmit={onSubmit}>
       <div className="rounded-3xl border border-border bg-card shadow-sm transition-shadow focus-within:shadow-md">
         <textarea
-          className="block max-h-40 min-h-[48px] w-full resize-none bg-transparent px-4 pt-4 pb-1 text-[15px] text-foreground leading-6 outline-none placeholder:text-muted-foreground field-sizing-content"
+          className="block max-h-40 min-h-[48px] w-full resize-none bg-transparent px-4 pt-4 pb-1 text-[16px] text-foreground leading-6 outline-none placeholder:text-muted-foreground field-sizing-content md:text-[15px]"
           onChange={(event) => onInputChange(event.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Ask Marvin"
@@ -97,10 +97,10 @@ export function ChatComposer({
           value={input}
         />
 
-        <div className="flex items-center justify-between gap-2 px-2 pb-2">
-          <ThemeToggle />
+        <div className="flex items-center gap-2 px-2 pb-2">
+          <div className="flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:gap-2">
+            <ThemeToggle />
 
-          <div className="flex items-center gap-2">
             {reasoningEfforts.length > 0 && (
               <Select
                 disabled={isBusy}
@@ -118,11 +118,9 @@ export function ChatComposer({
                     "[&>svg]:hidden",
                   )}
                 >
-                  <span className="flex items-center gap-1.5">
+                  <span className="flex min-w-0 items-center gap-1.5">
                     <BrainIcon className="size-3 shrink-0" />
-                    <span className="flex-none truncate text-left">
-                      {reasoningLabel}
-                    </span>
+                    <span className="truncate text-left">{reasoningLabel}</span>
                   </span>
                 </SelectTrigger>
                 <SelectContent
@@ -163,7 +161,7 @@ export function ChatComposer({
                   }
                 >
                   <ModelSelectorLogo provider={providerLogoSlug(model)} />
-                  <ModelSelectorName className="flex-none">
+                  <ModelSelectorName className="min-w-0 truncate">
                     {modelLabel}
                   </ModelSelectorName>
                 </ModelSelectorTrigger>
@@ -192,34 +190,34 @@ export function ChatComposer({
                 </ModelSelectorContent>
               </ModelSelector>
             )}
-
-            <Button
-              aria-label={isBusy ? "Stop" : "Send"}
-              className={cn(
-                "size-9 shrink-0 rounded-full transition-colors",
-                canSend
-                  ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                  : "bg-muted text-muted-foreground"
-              )}
-              disabled={!canSend}
-              onClick={
-                isBusy
-                  ? (event) => {
-                      event.preventDefault();
-                      onStop();
-                    }
-                  : undefined
-              }
-              size="icon-sm"
-              type={isBusy ? "button" : "submit"}
-            >
-              {isBusy ? (
-                <SquareIcon className="size-3.5" />
-              ) : (
-                <ArrowUpIcon className="size-4" />
-              )}
-            </Button>
           </div>
+
+          <Button
+            aria-label={isBusy ? "Stop" : "Send"}
+            className={cn(
+              "size-9 shrink-0 rounded-full transition-colors",
+              canSend
+                ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                : "bg-muted text-muted-foreground"
+            )}
+            disabled={!canSend}
+            onClick={
+              isBusy
+                ? (event) => {
+                    event.preventDefault();
+                    onStop();
+                  }
+                : undefined
+            }
+            size="icon-sm"
+            type={isBusy ? "button" : "submit"}
+          >
+            {isBusy ? (
+              <SquareIcon className="size-3.5" />
+            ) : (
+              <ArrowUpIcon className="size-4" />
+            )}
+          </Button>
         </div>
       </div>
     </form>
