@@ -8,6 +8,7 @@ import {
   ConversationContent,
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
+import { MarvinMark } from "@/components/marvin-mark";
 import { CollapsedSidebarActions } from "@/components/sidebar/collapsed-sidebar-actions";
 import { ConversationList } from "@/components/sidebar/conversation-list";
 import { MobileConversationMenu } from "@/components/sidebar/mobile-menu";
@@ -185,6 +186,7 @@ export function MarvinChat({
             onNew={handleNewChat}
             onSelect={handleSelectConversation}
           />
+          <MarvinMark className="size-4" />
           <span className="font-medium text-sm">Marvin</span>
         </div>
 

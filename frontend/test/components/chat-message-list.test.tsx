@@ -66,6 +66,7 @@ describe("ChatMessageList", () => {
     expect(
       screen.getByText("Pick a starting point below or ask anything.")
     ).toBeInTheDocument();
+    expect(screen.getByTestId("marvin-mark")).toBeInTheDocument();
   });
 
   it("renders messages", () => {

@@ -1,5 +1,6 @@
 "use client";
 
+import { MarvinMark } from "@/components/marvin-mark";
 import { Button } from "@/components/ui/button";
 import { PanelLeftCloseIcon } from "lucide-react";
 
@@ -10,7 +11,10 @@ interface SidebarBrandHeaderProps {
 export function SidebarBrandHeader({ onCollapse }: SidebarBrandHeaderProps) {
   return (
     <div className="flex w-full items-center justify-between gap-2 pb-2">
-      <h1 className="font-semibold text-base tracking-tight">Marvin</h1>
+      <div className="flex min-w-0 items-center gap-2">
+        <MarvinMark className="size-5" />
+        <h1 className="font-semibold text-base tracking-tight">Marvin</h1>
+      </div>
       {onCollapse && (
         <Button
           aria-label="Collapse sidebar"

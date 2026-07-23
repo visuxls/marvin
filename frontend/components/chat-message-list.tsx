@@ -29,7 +29,8 @@ import type {
 import {
   ConversationEmptyState,
 } from "@/components/ai-elements/conversation";
-import { CopyIcon, WalletIcon } from "lucide-react";
+import { MarvinMark } from "@/components/marvin-mark";
+import { CopyIcon } from "lucide-react";
 
 function userPromptText(message: UIMessage): string {
   return message.parts
@@ -79,7 +80,7 @@ export function ChatMessageList({
         <ConversationEmptyState
           className="min-h-[40vh] p-0"
           description="Pick a starting point below or ask anything."
-          icon={<WalletIcon className="size-8 text-muted-foreground" />}
+          icon={<MarvinMark className="size-8 text-muted-foreground" />}
           title="How can I help with your finances?"
         />
       ) : (
