@@ -4,7 +4,10 @@ import type { SVGProps } from "react";
 type MarvinMarkProps = SVGProps<SVGSVGElement>;
 
 /**
- * Brand mark: an elegant capital M matching the Marvin favicon letterform.
+ * Brand mark: M fused with three ascending chart bars (C1).
+ *
+ * Three columns share a baseline; slanted tops form an M silhouette
+ * while the overall rise reads as portfolio growth.
  */
 export function MarvinMark({ className, ...props }: MarvinMarkProps) {
   return (
@@ -17,10 +20,9 @@ export function MarvinMark({ className, ...props }: MarvinMarkProps) {
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
-      <path
-        d="M8.25 8.5v15h2.35v-8.1l5.4 6.35 5.4-6.35v8.1h2.35V8.5h-2.6l-5.15 6.1-5.15-6.1h-2.6z"
-        fill="currentColor"
-      />
+      <path d="M6.25 24.5V8.25L12 15.75V24.5H6.25Z" fill="currentColor" />
+      <path d="M13.25 24.5V16.5L19 12.78V24.5H13.25Z" fill="currentColor" />
+      <path d="M20.25 24.5V11.97L26 8.25V24.5H20.25Z" fill="currentColor" />
     </svg>
   );
 }

@@ -33,12 +33,10 @@ print_banner() {
     reset=$'\033[0m'
   fi
 
-  # Compact monogram + metadata (Claude Code / modern CLI style).
   printf '%s\n' \
     "" \
-    " ${cyan}▗▜▖   ▗▛▖${reset}  ${bold}Marvin${reset} ${dim}v${VERSION}${reset}" \
-    " ${cyan}▐▝▜▙ ▟▛▘▌${reset}  ${dim}Personal CFO assistant${reset}" \
-    " ${cyan}▐  ▝▀▘  ▌${reset}" \
+    "  ${bold}Marvin${reset} ${dim}v${VERSION}${reset}" \
+    "  ${dim}Personal CFO assistant${reset}" \
     "" \
     "  ${cyan}●${reset} ${dim}API${reset}  ${bold}http://${API_HOST}:${API_PORT}${reset}" \
     "  ${cyan}●${reset} ${dim}UI${reset}   ${bold}${UI_URL}${reset}  ${dim}· opens when ready${reset}"
